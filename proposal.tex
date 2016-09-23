@@ -1,0 +1,395 @@
+\documentclass[12pt]{article}
+
+%Dummy command to allow hrefs even with hyperref disabled
+\newcommand{\href}[1]{}
+
+%Used suggestion from http://www.tex.ac.uk/cgi-bin/texfaq2html?label=citesort to
+% get citations, hyperref and toc to play nice. You'll need hypernat.sty, available from
+% http://www.ctan.org/tex-archive/macros/latex/contrib/misc/hypernat
+
+%Turn on hyperlinking support; links will be created automatically in the TOC, and for \ref and \cite
+% Manual links can be created with:
+% \href{http://www.rice.edu/}{Rice University} - external link
+% \hyperlink{someLabel}{Text to be Linked} - internal link to existing \hypertarget{someLabel}{} in text
+
+
+\usepackage[colorlinks=true,pdfstartview=FitV,linkcolor=black,citecolor=black,urlcolor=blue,plainpages=false]{hyperref}
+
+\usepackage[numbers,sort&compress]{natbib}
+
+\usepackage{hypernat}
+\usepackage{times,epsf,epsfig,psfig,pdfpages,subfigure,amsmath,amssymb,wrapfig}
+
+\usepackage{wrapfig}
+%\usepackage[table]{xcolor}
+
+\usepackage{caption}
+\usepackage{wrapfig}
+%\usepackage[table]{xcolor}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{array}
+\usepackage{colortbl}
+
+\usepackage{tcolorbox}
+
+\usepackage{enumitem}
+
+\usepackage{comment}
+
+\usepackage{color}
+\usepackage{array}
+\usepackage{colortbl}
+
+\usepackage{wrapfig}
+
+\definecolor{tableYellow}{rgb}{.996, 1, .8549}
+\definecolor{tableBlue}{rgb}{0.8823, .9098, 1}
+\definecolor{tableRed}{rgb}{1, .9255, .9019}
+\definecolor{tableGreen}{rgb}{.9176, 1, .9216}
+\definecolor{tableGray}{rgb}{.902, .902, .902}
+
+\newcommand{\N}{{\mathsf N}}
+\newcommand{\T}{{\mathsf T}}
+\newcommand{\D}{{\mathsf D}}
+\newcommand{\R}{{\mathsf R}}
+\newcommand{\Tt}{{\mathcal T}}
+
+
+\setcounter{tocdepth}{3}
+\def\tablestrut{\vrule height1.25em depth0pt width0pt}
+\def\topfraction{.9}
+\def\bottomfraction{.9}
+\def\textfraction{.1}
+
+%\topmargin -0.625in
+%\topmargin -0.325in
+%\headsep .5in
+%\textheight 9in
+
+%\oddsidemargin 0in\evensidemargin\oddsidemargin
+%\textwidth  6.5in
+
+\textheight 9.2in
+\textwidth 6.7in
+\oddsidemargin -0.1in
+\evensidemargin 0in
+\topmargin -.5in \advance \topmargin-\baselineskip \headsep .5in
+\marginparwidth .5in \marginparsep .1in
+
+\floatsep 8pt plus 2pt minus 2pt
+\textfloatsep 8pt plus 2pt minus 2pt
+%\renewcommand{\textfraction}{0.1}
+%\setlength{\parskip}{.5pt plus .25pt minus .25pt}
+
+%\newcommand{\comment}[1]{}
+
+\newtheorem{theorem}{Theorem}%[section]
+\newtheorem{prop}[theorem]{Proposition}
+\newtheorem{defn}[theorem]{Definition} \newtheorem{fact}[theorem]{Fact}
+\newtheorem{lemma}[theorem]{Lemma}
+\newtheorem{corollary}[theorem]{Corollary}
+\newtheorem{conj}[theorem]{Conjecture}
+\newtheorem{algorithm}[theorem]{Algorithm}
+\newtheorem{problem}[theorem]{Problem}
+
+   \newtheorem{definition}{Definition}
+   \newtheorem{remark}{Remark}
+ \newtheorem{example}{Example}
+
+%\newcommand{\SNR}{{\sf SNR}}
+
+\makeatletter
+\renewcommand\section{\@startsection {section}{1}{\z@}%
+   {-3ex \@plus -1ex \@minus -.2ex}%
+   {1.7ex \@plus.2ex}%
+   {\normalfont\large\bfseries}}
+\renewcommand\subsection{\@startsection{subsection}{2}{\z@}%
+   {-2.5ex\@plus -1ex \@minus -.2ex}%
+   {1ex \@plus .2ex}%
+   {\normalfont\normalsize\bfseries}}
+\renewcommand\subsubsection{\@startsection{subsubsection}{3}{\z@}%
+   {1.5ex\@plus 1ex \@minus .2ex}%
+   {.5ex \@plus .2ex}%
+   {\normalfont\normalsize\bfseries}}
+\setcounter{secnumdepth}{3}
+\makeatother
+
+%\psdraft   % causes figures to be replaces by just a box
+
+%\usepackage{enumerate}
+%\addbibresource{ref.bib,ref2.bib,salman.bib,salman1.bib,bib/annavaram.bib,bi/bk.tex}
+
+\input{macros.tex}
+
+\begin{document}
+
+%\thispagestyle{empty}
+%\begin{center} 
+
+%{\large \bfseries APaC: Adaptive Pricing and Coding for Dispersed Computing}
+
+%\vspace{0.2in}
+
+%{\large  Salman Avestimehr, USC}
+
+%\vspace{0.05in}
+%
+%{\large \bfseries University of Southern California (USC) }
+
+%\end{center}
+
+
+%\newpage
+\thispagestyle{empty}
+
+\begin{center}
+{\large \bfseries APaC: Adaptive Pricing and Coding for Dispersed Computing}
+
+\vspace{0.2in}
+
+{\large \bfseries Volume 1: Technical and Management Proposal}
+
+\vspace{0.2in}
+
+{\large \bfseries Cover Sheet} 
+\end{center}
+
+\begin{itemize}
+\item Label: ``Proposal: Volume 1''
+\item BAA number: ??
+\item Technical area: TA1
+\item Proposal title: ??
+\item Lead organization (prime contractor) name: University of Illinois at Urbana Champaign (UIUC)
+\item Type of organization: Other Educational
+\item Technical point of contact (POC): Prof. Nam Sung Kim, Tel: (217) 244-9169, email: \url{nskim@illinois.edu}, Address: ??.
+\item Administrative POC: FILL UIUC INFO Janet Ng, Contract and Grant Officer, Tel: (213) 740-6478, email: \url{janetng@research.usc.edu}, Address: University of Southern California, 3720 South Flower Street, 3rd Floor, Los Angeles, CA.
+\item Award instrument requested: FILL cooperative agreement
+\item Total amount of the proposed effort: The project has three phases, costing \$3,739,215 and a 1-year option phase, costing \$478,539 (total cost of \$4,217,754).
+\item Place(s) and period(s) of performance: University of Southern California, Los Angeles, CA. Phase 1 \& 2: 4 years (3/1/2017 ? 2/28/2021); Option Period: 1 year (3/1/2019 ? 2/28/2020).
+\item Other team member information: \begin{itemize}
+\item Prof. Murali Annavaram, Tel: (213) 740-3299 , email: \url{annavara@usc.edu}, Address: EEB 232, University of Southern California, Los Angeles, CA.
+\item FILL.
+\end{itemize}
+\item Proposal validity period: 180 days
+\item Data Universal Numbering System (DUNS) number: FILL
+\item Taxpayer identification number: FILL
+\item Commercial and Government Entity (CAGE) code: FILL
+\item Security POC including name, mailing address, telephone number, and email
+address, if applicable: NA
+\item Proposer's reference number (if any): NA
+\end{itemize}
+
+
+\newpage
+\pagestyle{empty}
+\tableofcontents
+\newpage
+\pagestyle{plain}
+\pagenumbering{arabic}
+\setcounter{page}{1}
+\vspace{-0.2in}
+\section{Executive Summary}
+\input{A-summary.tex}
+
+\section{Technical Approach}
+\input{B-technical.tex}
+
+\section{Statement of Work}
+\input{C-SOW.tex}
+
+\section{Deliverables}
+\input{D-deliverable.tex}
+
+%MURALI
+
+Recent years have witnessed a rapid growth of computationally intensive applications on users' devices for military operations, such as image/video recognition for surveillance and autonomous navigation, augmented reality on mobile devices, and cyber security via real-time network log analysis of the users. These big data processing applications have been an exclusive domain of large enterprise class servers and datacenters. But in many of these application domains much of the data needed is collected at the edge devices such as sensors, mobile platforms. The data is then channelled through a collection of networked computation points to the backend servers. There is a significant amount of computing capability that is embedded along the entire path from edge to the cloud. Hence, exploiting these dispersed computing capabilities is not only beneficial for performance and power, but it is also required in the context of military operations, where uncertainty in available bandwidth and latency in decision making are critical considerations. In many scenarios access to the cloud can be very limited, or it may require significant backhaul data movement that is infeasible. As a result,  there is a critical need for enabling \emph{dispersed computing}, in which computation is carried out using the computational resources that are locally available to the users. 
+
+\vspace{-0.1in}
+\input{Task1.tex}
+\vspace{-0.1in}
+\input{Task2.tex}
+\vspace{-0.1in}
+\input{Task3.tex}
+
+%\vspace{1em}
+%\noindent {\LARGE \textbf{Phase 2}}
+\vspace{-0.1in}
+\input{Task4.tex}
+\vspace{-0.1in}
+\input{Task5.tex}
+\vspace{-0.1in}
+\input{Task6.tex}
+
+\vspace{-0.1in}
+\section{TA3 Integration Concept}
+\label{sec:Integration}
+\input{integration.tex}
+
+\vspace{-0.1in}
+\section{Management Plan}
+\vspace{-0.1in}
+The project requires expertise in distributed computing, online algorithms, communications, networking and runtime systems.  Towards that end, the proposed team consists of three prime members with the following expertise and unique capabilities:
+\begin{itemize}[topsep=0pt,itemsep=0ex,partopsep=0ex,parsep=0ex,leftmargin=*]
+\item \textbf{Dr. Salman Avestimehr (PI)} has expertise in distributed computing, coding, data analytics, network information theory, and communication networks. His major recent research accomplishment that is most relevant to this project is the invention of \emph{Coded Distributed Computing}~\cite{LMA_all,ComCom16,ComComJ16,EdgeCompG,EdgeCompACM} that provides a novel joint computing and communication design framework for distributed computing to significantly reduce the bandwidth consumption and response latency. 
+\item \textbf{Dr. Murali Annavaram (co-PI)} is an expert in runtime systems for mobile computing, energy efficient computer system architecture, reliability and availability of high performance computing, and datacenter design.  His major recent research accomplishment that is most relevant to this project is a practical computational offloading system built on top of Android OS~\cite{lee2012wireless, annavaram2015runtime}, which was exclusively licensed to a major mobile device vendor for product adoption.
+\item \textbf{Dr. Bhaskar Krishnamachari (co-PI)} has expertise in the design and analysis of algorithms and protocols for networked communication and computation, using tools from combinatorial algorithms, online learning, network utility optimization and game theory. His major  relevant accomplishments include the design of Hermes, the first $1+\epsilon$ approximation algorithm (FPTAS) for minimizing the latency (makespan) of scheduling the distributed computation for a large class of task graphs on an arbitrary network of processors~\cite{Hermes2015}, and LLR, the first polynomial-regret policy for online network optimization~\cite{Gai2012}. 
+\end{itemize}
+
+
+Dr. Avestimehr will be the principal investigator (PI) and responsible for overall project management. The three prime members are highly committed to collaborative research, and have already established a very effective and efficient collaborative environment. The task responsibilities of prime team members are shown in Table~\ref{table:roles}. There will also be one senior programmer, one postdoctoral scholar, and four PhD students involved in the project, with the following roles:
+\begin{itemize}[topsep=0pt,itemsep=0ex,partopsep=0ex,parsep=0ex,leftmargin=*]
+\item \textbf{Senior Research Programmer.} The senior research programmer (SRP) will assist in porting the coded optimization algorithms onto the two testbeds. SRP will be responsible for interacting with dispersive technologies to understand the system usage APIs and to port the algorithms developed by the PIs to match the testbed-specific needs. For the USC testbed, SRP will  be responsible for bringing up the Arduino and Raspberry Pi setups and interface them with appropriate sensors. SRP will setup the desktop computing infrastructure to enable appropriate RDMA, RoCE and RSCSI on the underlying hardware. SRP will also work with the graduate students and PIs to translate the code/data movement choices to use the right set of underlying interfaces and APIs in the heterogeneous testbeds.    
+\item \textbf{Postdoctoral Scholar.} We will involve one postdoctoral scholar with expertise in distributed computing, resource allocation for computation workflows, and coding. The postdoctoral scholar will co-supervised by Dr. Avestimehr and Dr. Krishnamachari, and will facilitate collaborations between Tasks 1 and 2 in Phase 1, and Tasks 1 and 2 in Phase 2.
+\item \textbf{PhD Students.} We will involve four PhD Student to work full time on this project. The first PhD student will focus on Task 1 in Phases 1 and 2, and will be supervised by Dr. Krishnamachari, the second PhD student will focus on Task 2 in Phases 1 and 2, and will be supervised by Dr. Avestimehr, the third PhD student will focus on Task 2 in Phases 1 and 2, and will be supervised by Dr. Annavaram, and the fourth PhD student will be co-supervised by Dr. Annavaram and Dr. Krishnamachari and collaborate on Tasks 1 and 3 in Phases 1 and 2, in order to facilitate interactions between these tasks. 
+\end{itemize}
+\begin{table}[t]
+\vspace{-0.1in}
+\begin{center}
+    \begin{tabular}{|| p{4cm} ||  p{5cm} || p{6.4cm} ||}
+    \hline
+    \textbf{Prime Member} & \textbf{Leading Tasks} & \textbf{Collaborating Tasks}  \\ \hline
+    Dr. Salman Avestimehr & {\small Overall project management, Phase 1 Task 2,  Phase 2 Task 2} & {\small Phase 1 Task 1, Phase 1 ST 3.4-3.6, Phase 2 Task 1,  Phase 2 ST 3.4-3.6}  \\ \hline
+    Dr. Murali Annavaram &  {\small Phase 1 Task 3 \& Phase 2 Task 3} & {\small Interfaces with all tasks for testbed demo}  \\ \hline
+    Dr. Bhaskar Krishnamachari & {\small Phase 1 Task 1 \& Phase 2 Task 1} & {\small Phase 1 Task 2, Phase 2 Task 2, Phase 1 ST 3.4-3.6, Phase 2 ST 3.4-3.6}  \\
+    \hline
+    \end{tabular}
+    \end{center}
+    \vspace{-0.2in}
+    \caption{Task responsibilities of prime members.}
+    \label{table:roles}
+\end{table}
+
+
+
+\noindent \textbf{Effort Coordination.} We will organize bi-weekly meetings in which all team member participate. The goal of the meeting will be to (1) discuss the new results obtained in the project, (2) identify new problems and research directions for collaboration, and (3) set the milestones for next meeting. We expect that at these meetings students will present an in-depth presentation of their current work and research progress to the entire group. To the extent possible our team will use existing open technological infrastructure such as github, trac and wikis to boost productivity. USC has extensive expertise in running open systems and will leverage these resources for this project. Our wiki site will be used initially for documenting the research progress internally, discussions on related work. The web site will serve as a repository for publications, annual program plans, quarterly progress reports, notes from meetings,  and all other products of research.
+%We will organize bi-weekly meetings in which all team member participate. The goal of the meeting will be to (1) discuss the new results obtained in the project, (2) identify new problems and research directions for collaboration, and (3) set the milestones for next meeting.
+
+\vspace{-0.2in}
+\section{Personnel, Qualifications, and Commitments}
+\vspace{-0.1in}
+The proposed team consists of three prime members with the following qualifications and expertise:
+\begin{itemize}[topsep=2pt,itemsep=-1ex,partopsep=1ex,parsep=1ex,leftmargin=*]
+\item \textbf{Dr. Salman Avestimehr (PI)} is an Associate Professor at the Electrical Engineering Department of University of Southern California. Dr. Avestimehr has expertise in distributed computing, coding, data analytics, network information theory, and communication networks. His major recent research accomplishments include (1) invention of \emph{Coded Distributed Computing}~\cite{LMA_all,ComCom16,ComComJ16,EdgeCompG,EdgeCompACM} that provides a novel joint computing and communication design framework for distributed computing to significantly reduce the bandwidth consumption and response latency; (2) invention of \emph{Information-Theoretic Link Scheduling (ITLinQ)}~\cite{ITLinQJournal,ITLinQDyspan,ITLinQISIT,cachedITLinQ} that provides a new framework for spectrum sharing in device-to-device communication networks based on information-theoretic metrics, which significantly improves the state-of-the-art by increasing network throughput and fairness; and (3) development of new \emph{approximation techniques for network information theory}~\cite{DetMonograph,ADTJ09,MHMFMonograph,AASIT10} that allowed progress on decades-old open problems in network capacity. 
+
+Dr. Avestimehr has received many awards for his research, including the Communications Society and Information Theory Society Joint Paper Award, the Presidential Early Career Award for Scientists and Engineers (PECASE) for ``pushing the frontiers of information theory through its extension to complex wireless information networks'', the Young Investigator Program (YIP) award from the U. S. Air Force Office of Scientific Research, and the National Science Foundation CAREER award. Dr. Avestimehr has led several large research projects, including a multi-university four-year research project on ``video-aware wireless networks'' and a multi-university four-year research project on ``Information Architectures for Femto-aided Networks''.
+
+\item \textbf{Dr. Murali Annavaram (co-PI)} has seven years of industrial experience at Intel and Nokia prior to his appointment at USC. He designed and demonstrated physical prototypes and large scale testbeds, including the mobile century experiment where 100s of cars were equipped with mobile phones to generate traffic data using virtual trip lines~\cite{hoh2008virtual}. While working at Intel his research on Energy Per Instruction (EPI) throttling ~\cite{Annavaram2005}, formed the foundation for TurboBoost technology.  His work at Intel led to 8 issued/pending patents. He currently holds the Robert G. and Mary G. Lane Early Career Chair in the Ming-Hsieh Department of Electrical Engineering at the University of Southern California. Murali received NSF CAREER award in 2010 and an IBM Faculty Partnership award in 2009. Annavaram co-developed several hierarchical mobile sensing algorithms to improve energy efficiency of sensing platforms~\cite{wang2009-1,wang2009-2,wang2010,Liu2008}. Prior to his appointment at USC, he was a senior research scientist at the Intel Microprocessor Research Labs from 2001 to 2007 working on energy efficient server design and 3D stacking architectures. In 2007 he was a visiting researcher at  Nokia Research Center working on virtual trip line based traffic sensing. 
+
+%His  recent research on improving mobile energy efficiency through dynamic computational offloading in the cloud has been exclusively licensed by a mobile manufacturer for commercialization.
+
+\item \textbf{Dr. Bhaskar Krishnamachari (co-PI)} is a Professor and Ming Hsieh Faculty Fellow in Electrical Engineering with a joint appointment in Computer Science at the Viterbi School of Engineering, University of Southern California. He has expertise in the design and analysis of algorithms for next-generation networks, including distributed edge computing~\cite{Hermes, Latency14}, cognitive radio networks~\cite{GaiDSA14}, robotic networks~\cite{RouteSwarm}, connected vehicles~\cite{OptDissem, V2VCodedStorage}, and low power wireless embedded networks~\cite{BCP, MCC}. His work provides a bridge between theory and practice: developing and applying mathematical tools from combinatorial algorithms~\cite{GhoshGraph}, game theory~\cite{mm1, YWu16}, network utility maximization~\cite{Sridharan09}, stochastic decision theory~\cite{wang2010} and online learning~\cite{Gai2012} to practical problems in these domains. 
+
+He has co-authored over 200 papers on these subjects, including several that have received best paper awards at ACM/IEEE IPSN (2004, 2010), ACM Mobicom (2010) and ACM MSWiM (2006), and collectively more than 19000 citations (per Google Scholar). He has also received the NSF Career Award (2004), the ASEE Terman Award (2010), and as listed in MIT Technology Review's TR-35 (2011), and Popular Science's Brilliant 10 (2015). He is the author of a textbook titled ``Networking Wireless Sensors" published by Cambridge University Press in 2005, and has served as an Associate Editor for the ACM Transactions on Sensor Networks, IEEE Transactions on Mobile Computing and IEEE Transactions on Wireless Communications. His research over the past decade and a half has been funded by Federal agencies including NSF, NASA, ARL, as well as industry sources including GM, Northrop Grumman, and Bosch Research. 
+
+% During the course of this project, Krishnamachari is committed to spending significant time and effort (20\% of his time) on this project each year. He is not currently involved in any other large-scale funded research projects.
+
+\end{itemize}
+
+The level of effort in terms of hours to be expended by each person during each contract phase and other (current and proposed) major sources of support for each member with commitments of efforts for each source is shown in the table of Figure~\ref{fig:timeCommitment}.
+\begin{figure}[t]
+\vspace{-0.3in}
+   \centering
+   \includegraphics[width=0.75\textwidth]{timeCommitment.pdf}  
+   \vspace{-0.2in}
+   \caption{Time Commitments of Key Team Members}
+   \label{fig:timeCommitment}
+\end{figure}
+
+\vspace{-0.1in}
+\section{Capabilities}
+\vspace{-0.1in}
+\begin{itemize}[topsep=0pt,itemsep=0ex,partopsep=0ex,parsep=0ex,leftmargin=*]
+\item Dr. Avestimehr, Annavaram, and Krishnamachari are directors of very successful research labs with outstanding PhD students, postdoctoral scholars, and MS students. They have expertise in distributed computing, online algorithms, communications, networking and runtime systems.
+\item We maintain a 250 core high end compute cluster and five Nvidia GPU based systems for running distributed algorithms. However, these are not physically dispersed. We will rely on this cluster primarily for our initial debugging of distributed algorithms, and the final demonstrations will use the new dispersed testbeds. 
+\item We maintain a 100-node Tutornet, a low power wireless embedded networking testbed that has been in operation since 2006 (http://anrg.usc.edu/www/tutornet/), and used by many researchers to evaluate algorithms and protocols for routing, transport, channel scheduling, resource allocation. This testbed will be federated with the new dispersed testbeds created during this project. 
+\item We are in an excellent position to utilize a number of state of the art resources at the USC Viterbi School of Engineering, include the DETERLAB network security testbed at USC/ISI, and the USC High Performance Computing Center (HPCC).
+\end{itemize} 
+
+%Krishnamachari is the Director of the Autonomous Networks Research Group, consisting of 10 Ph.D. students at present (22 graduated to date), and also involving several MS and undergraduate students. His group maintains the 100-node Tutornet, a low power wireless embedded networking testbed that has been in operation since 2006 (http://anrg.usc.edu/www/tutornet/), and used by many researchers to evaluate algorithms and protocols for routing, transport, channel scheduling, resource allocation. This testbed will be federated with the new dispersed testbeds created during this project. 
+
+\vspace{-0.2in}
+\section{Statement of Work (SOW)}
+\label{sec:sow}
+\vspace{-0.1in}
+\input{sow.tex}
+
+
+
+\vspace{-0.1in}
+\section{Schedule and Milestones}
+\vspace{-0.1in}
+The timeline of all tasks in the project, the interrelations among the tasks, and the milestones (i.e., demonstration plan) of the project are shown in Figure~\ref{fig:timelineALL}. There are a total of 9 demonstration plans and milestones during the project that are described in detail (with their corresponding goals, metrics, and deliverables) at the end of SOW (Section~\ref{sec:sow}).
+
+
+
+\vspace{-0.1in}
+\section{Level of Effort Summary by Task}
+\vspace{-0.1in}
+The estimated level of effort per task is summarized in the Table shown in Figure~\ref{fig:TaskHours}.
+
+\begin{figure}[htp]
+ \vspace{-2 mm}
+   \centering
+   \includegraphics[width=1\textwidth]{TaskHours2.pdf}
+   \vspace{-0.3in}
+   \caption{The estimated level of effort per task.}
+   \label{fig:TaskHours}
+ \vspace{-0.1in}
+\end{figure}
+
+
+\newpage
+\section{Appendix A}
+
+\begin{itemize}
+\item \textbf{Team Member Identification:} The identification of team members is described in Table~\ref{table:teamID}.
+\end{itemize}
+
+\begin{table}[htp]
+\begin{center}
+    \begin{tabular}{|| l ||  l || p{4cm} || l | p{2cm} ||}
+    \hline
+    \textbf{Individual Name} & \textbf{Role} & \textbf{Organization} & \textbf{Non-US?} & \textbf{FFRDC or Govt?}  \\ \hline
+    Dr. Salman Avestimehr & Prime & University of Southern California & No & None  \\ \hline
+    Dr. Murali Annavaram & Prime & University of Southern California & No & None  \\ \hline
+    Dr. Bhaskar Krishnamachari & Prime & University of Southern California & No & None  \\
+    \hline
+    \end{tabular}
+    \end{center}
+    \vspace{-0.2in}
+    \caption{Task responsibilities of prime members.}
+    \label{table:teamID}
+\end{table}
+
+
+
+\begin{itemize}
+\item \textbf{Organizational Conflict of Interest Affirmations and Disclosure:} None.
+\item \textbf{Intellectual Property (IP):} None.
+\item \textbf{Human Subjects Research (HSR):} None.
+\item \textbf{Animal Use:} None.
+\end{itemize}
+
+\begin{itemize}
+\item \textbf{Representations Regarding Unpaid Delinquent Tax Liability or a Felony Conviction under Any Federal Law:}
+\begin{enumerate}
+    \item  The proposer is \textbf{not} a corporation that has any unpaid Federal tax liability that has been assessed, for which all judicial and administrative remedies have been exhausted or have lapsed, and that is not being paid in a timely manner pursuant to an agreement with the authority responsible for collecting the tax liability,
+\item The proposer is \textbf{not} a corporation that was convicted of a felony criminal violation under a Federal law within the preceding 24 months.
+\end{enumerate}
+\item \textbf{Cost Accounting Standards (CAS) Notices and Certification:} None.
+\end{itemize}
+
+\newpage
+\section{Appendix B}
+%\clearpage
+%\pagenumbering{arabic}
+%\def\thepage{F-\arabic{page}}
+%% \bibliographystyle{numbersx}
+\bibliographystyle{IEEEbib}
+\bibliography{bib/ref,bib/ref2,bib/salman,bib/salman1,bib/annavaram,bib/bk}
+%\bibliography{bib/ref,bib/ref2,bib/salman,bib/salman1,bib/annavaram}
+
+%\printbibliography
+
+\end{document}
