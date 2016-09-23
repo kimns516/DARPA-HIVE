@@ -18,7 +18,7 @@
 \usepackage[numbers,sort&compress]{natbib}
 
 \usepackage{hypernat}
-\usepackage{times,epsf,epsfig,psfig,pdfpages,subfigure,amsmath,amssymb,wrapfig}
+\usepackage{times,epsf,epsfig,pdfpages,subfigure,amsmath,amssymb,wrapfig}
 
 \usepackage{wrapfig}
 %\usepackage[table]{xcolor}
@@ -120,29 +120,11 @@
 %\usepackage{enumerate}
 %\addbibresource{ref.bib,ref2.bib,salman.bib,salman1.bib,bib/annavaram.bib,bi/bk.tex}
 
-\input{macros.tex}
+%\input{macros.tex}
 
 \begin{document}
-
-%\thispagestyle{empty}
-%\begin{center} 
-
-%{\large \bfseries APaC: Adaptive Pricing and Coding for Dispersed Computing}
-
-%\vspace{0.2in}
-
-%{\large  Salman Avestimehr, USC}
-
-%\vspace{0.05in}
-%
-%{\large \bfseries University of Southern California (USC) }
-
-%\end{center}
-
-
-%\newpage
 \thispagestyle{empty}
-
+\begin{comment}
 \begin{center}
 {\large \bfseries APaC: Adaptive Pricing and Coding for Dispersed Computing}
 
@@ -154,40 +136,50 @@
 
 {\large \bfseries Cover Sheet} 
 \end{center}
+\end{comment}
+\noindent 
+{\large \bfseries Section I. Administrative}
 
 \begin{itemize}
-\item Label: ``Proposal: Volume 1''
-\item BAA number: ??
-\item Technical area: TA1
-\item Proposal title: ??
-\item Lead organization (prime contractor) name: University of Illinois at Urbana Champaign (UIUC)
-\item Type of organization: Other Educational
-\item Technical point of contact (POC): Prof. Nam Sung Kim, Tel: (217) 244-9169, email: \url{nskim@illinois.edu}, Address: ??.
-\item Administrative POC: FILL UIUC INFO Janet Ng, Contract and Grant Officer, Tel: (213) 740-6478, email: \url{janetng@research.usc.edu}, Address: University of Southern California, 3720 South Flower Street, 3rd Floor, Los Angeles, CA.
-\item Award instrument requested: FILL cooperative agreement
-\item Total amount of the proposed effort: The project has three phases, costing \$3,739,215 and a 1-year option phase, costing \$478,539 (total cost of \$4,217,754).
-\item Place(s) and period(s) of performance: University of Southern California, Los Angeles, CA. Phase 1 \& 2: 4 years (3/1/2017 ? 2/28/2021); Option Period: 1 year (3/1/2019 ? 2/28/2020).
-\item Other team member information: \begin{itemize}
-\item Prof. Murali Annavaram, Tel: (213) 740-3299 , email: \url{annavara@usc.edu}, Address: EEB 232, University of Southern California, Los Angeles, CA.
-\item FILL.
+\item BAA number: DARPA-BAA-16-52
+\item Technical area: TA1: Graph Analytic Processor
+\item Lead organization submitting proposal: University of Illinois at Urbana-Champaign
+\item Type of organization: OTHER EDUCATIONAL
+\item Proposer’s abstract reference number: DARPA-16-52-HIVE-PA-043
+\item Other team member and type of organization: 
+\begin{itemize}
+\item Professor Murali Annavaram, OTHER EDUCATIONAL
+\item Professor Mingoo Seok, OTHER EDUCATIONAL
+\item Professor Pavan Kumar Hanumolu, OTHER EDUCATIONAL
+\item Professor Wen-mei Hwu, OTHER EDUCATIONAL
+\item Dr. Michael Schulte, LARGE BUSINESS
 \end{itemize}
-\item Proposal validity period: 180 days
-\item Data Universal Numbering System (DUNS) number: FILL
-\item Taxpayer identification number: FILL
-\item Commercial and Government Entity (CAGE) code: FILL
-\item Security POC including name, mailing address, telephone number, and email
-address, if applicable: NA
-\item Proposer's reference number (if any): NA
+\item Proposal title: Processor and Memory Sub-system Architectures for Near-memory Graph Analytic Processing
+\item Technical POC: 
+\begin{itemize}
+\item Professor Nam Sung Kim
+\item Tel: (217) 244-9169
+\item Email: \url{nskim@illinois.edu}
+\item Address: 1308 W. Main St., Urbana, IL 61801-2307
+\end{itemize}
+\item Administrative POC: 
+\begin{itemize}
+\item Mr. David Richardson
+\item Tel: (217) 333-2187
+\item Email: \url{osp@illinois.edu}
+\item Address: 1901 S. First Street, Suite A Champaign, IL 61820-7406
+\end{itemize}
+\item Total fund requested from DARPA: The project has three phases, costing \$10,000,000.
+\item Date proposal was submitted: October 19, 2016.
 \end{itemize}
 
 
-\newpage
-\pagestyle{empty}
-\tableofcontents
 \newpage
 \pagestyle{plain}
 \pagenumbering{arabic}
 \setcounter{page}{1}
+\noindent 
+{\large \bfseries Section II. Detailed Proposal Information}
 \vspace{-0.2in}
 \section{Executive Summary}
 \input{A-summary.tex}
@@ -219,7 +211,7 @@ address, if applicable: NA
 \section{Summary Slide}
 \input{J-slide.tex}
 
-
+\begin{comment}
 %MURALI
 
 Recent years have witnessed a rapid growth of computationally intensive applications on users' devices for military operations, such as image/video recognition for surveillance and autonomous navigation, augmented reality on mobile devices, and cyber security via real-time network log analysis of the users. These big data processing applications have been an exclusive domain of large enterprise class servers and datacenters. But in many of these application domains much of the data needed is collected at the edge devices such as sensors, mobile platforms. The data is then channelled through a collection of networked computation points to the backend servers. There is a significant amount of computing capability that is embedded along the entire path from edge to the cloud. Hence, exploiting these dispersed computing capabilities is not only beneficial for performance and power, but it is also required in the context of military operations, where uncertainty in available bandwidth and latency in decision making are critical considerations. In many scenarios access to the cloud can be very limited, or it may require significant backhaul data movement that is infeasible. As a result,  there is a critical need for enabling \emph{dispersed computing}, in which computation is carried out using the computational resources that are locally available to the users. 
@@ -410,5 +402,5 @@ The estimated level of effort per task is summarized in the Table shown in Figur
 %\bibliography{bib/ref,bib/ref2,bib/salman,bib/salman1,bib/annavaram}
 
 %\printbibliography
-
+\end{comment}
 \end{document}
