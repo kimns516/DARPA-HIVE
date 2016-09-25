@@ -1,1 +1,25 @@
+\noindent
+As computing is widely used in sophisticated data analytics, processing large scale graphs to study the vertex interactions is becoming extremely critical. 
+Especially, due to the sheer size of many graphs with billions of vertices and edges, memory access latency often becomes the primary performance bottleneck. 
+While processing-in-memory (PIM) offer high bandwidth for nearby accelerators, memory access patterns in graph analytics make existing PIM based acceleration schemes ineffective. 
+On the algorithmic front, graph analytics require significant interconnect bandwidth and synchronization support leading to massive slowdowns and load imbalances during computations. 
+These observations lead to the main research thrusts of this proposal, as described below.
+ 
+First, high bandwidth memory (HBM) and hybrid memory cube (HMC) used for recent PIM architectures can provide high bandwidth only for sequential, regular memory accesses. 
+In contrast, graph analytics require efficient support for irregular and small granularity memory accesses. 
+We tackle this problem by adopting a recent DiRAM4 3D Memory from Tezzaron and archi-tecting on-chip caches and a custom memory controller to efficiently support small granularity irregular memory accesses. 
+Specifically, DiRAM4 provides the same aggregate bandwidth as HBM2, but it provides 4× more (but narrower) channels than HBM2. 
+Exploiting this design, we propose to design a new cache architecture that efficiently supports both fine- and coarse-grained data accesses with short latency through spatial voltage boosting. 
+We will architect the DiRAM4 controller to fully exploit many narrow memory channels, to fit the graph analytics (e.g., provid-ed data-map) for more efficient bandwidth utilization.
+
+The high-efficiency memory interface will be augmented with novel processing efficiency schemes. 
+(1) We propose a hardware unit to efficiently support relaxed synchronization techniques and thus reduce synchronization overhead. 
+(2) The accelerator core will be architected with a coarse-grain reconfigurable array of execution units so that operations for a complex graph primitive function can be executed by a single instruction and memory access in a data-flow manner within an accelerator. 
+(3) To efficiently support streaming graph analytics, we propose “updated buffer” which allows an accelerator core to apply computations and changes to a batch of vertices rather than individual vertices. 
+(4) We design a trailblazer core to exploit the repeated computations across multiple vertices to learn about data access patterns and opportunistically bring anticipated data from other PIM packages or the main memory of the host system.
+
+Lastly, a PIM package integrating HBM, HMC, and even DiRAM4 with accelerators can provide only limited memory capacity per channel as they use point-to-point interconnects. 
+For large graphs this requires frequent data transfers from/to the large main memory of the host system and/or other PIM packages. 
+This demands many high-bandwidth links, posing power, ther-mal, and signal integrity challenges. 
+We tackle this challenge with various charge-based and in-jection-locking techniques for high-speed links.
 
