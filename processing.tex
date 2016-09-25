@@ -1,1 +1,17 @@
+\noindent
+\textbf{Coarse-Grained Reconfigurable Processing Engine:} 
+To efficiently execute graph primitives, we aim to architect the CGR-Core with a coarse-grain reconfigurable (CGR) array of execution units. 
+This architecture based on a spatial data-flow architecture can significantly reduce the overhead of instruction fetches and data transfers within an accelerator, as many operations for a complex graph primitive function can be executed by a single (macro) instruction and a few registerfile and/or cache accesses. 
+Furthermore, for streaming graph analytics, it is very inefficient to apply computations and changes to individual vertices as they arrive. 
 
+We propose the “update buffer” to allow CGR-Core to bulk commit messages bound for (or coming from) multiple vertices in a single phase.
+
+\noindent
+\textbf{Trailblazer:} 
+One of the unique properties of graph algorithms is that all vertices perform the same computation (with some limited control flow support). 
+Hence, the execution behavior of future vertex computations can be easily inferred from current vertex computations. 
+We will use the notion of trailblazing where some of the vertex computation tasks are closely monitored. 
+During trail blazing various microarchitectural events are monitored, such as memory bandwidth, branch behavior patterns and affinity of communication between different vertices. 
+We hypothesize that there are pairs of vertices that exhibit dominant communication patterns which can be inferred from trail blazing. 
+We will use the knowledge from trailblazing to potentially co-locate affine vertices to the same compute node. 
+The notion of trail blazing was used for prefetching irregular data in CPUs, but we plan to apply similar principle for managing vertex computations.
