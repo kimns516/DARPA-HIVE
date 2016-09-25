@@ -1,0 +1,17 @@
+\noindent
+\textbf{On-chip Cache Architecture:} 
+We propose FCG-Cache to efficiently support narrow width data accesses from multiple memory locations to co-reside in a single cache line. 
+We introduce a concept of chunk tags to store narrow width tags, in addition to a conventional tag for each cache line. 
+This adds only a small area overhead, but allow us to efficiently use 128-byte cache lines for storing 16-, 32-, and 64-byte blocks from non-consecutive addresses, as well as a 128-byte block whose bytes are from consecutive addresses. 
+To provide a cost-effective, large-capacity L2 cache, we will use eDRAM. 
+Especially, to overcome relatively slow speed of eDRAM compared to SRAM, we propose a dynamic fine-grained spatial voltage boosting technique. 
+In particular, this technique is beneficial for graph analytics that only need to access a small subset of a large eDRAM cache line without dissipating excessive power.
+
+\noindent
+\textbf{Off-chip Memory Architecture:} 
+We aim to build our memory sub-system using Tezzaron’s DiRAM4 3D Memory for the main memory of our accelerator. 
+One 8GB DiRAM die provides 64 32-bit ports (total 2048 I/O pins) with 1TB/s bandwidth. 
+HBM2 is expected to provide the same bandwidth as DiRAM, but we choose DiRAM because DiRAM provides narrower but more memory channels (64×32-bit channels) than HBM2 (16×128-bit channels). 
+That is DiRAM is more advantageous than HBM2 for graph analytics applications that generate random/irregular memory accesses. 
+Especially, we will introduce a concept of dynamic memory channel formation where we dynamically group these 64 physical memory channels to form wider logical memory channels to efficiently service both random/irregular and sequential/regular memory accesses from the accelerators, depending on current memory access patterns. 
+Subsequently, exploiting these many narrow memory channels, provided ``data-map,'' and relaxed synchronization, we will design an efficient memory controller with simple but large memory queues that allow us to coalesce as many random/irregular memory requests as possible.
