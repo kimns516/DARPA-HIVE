@@ -1,0 +1,46 @@
+
+%%% How would you use the data flow model to ensure load balancing of large scale systems?
+%%% Understanding how data moves from memory, processors, and between processing nodes is
+%%% essential to creating a computer architecture that avoids processor stalls common in today’s
+%%% systems. The ability to map problems on to more than one processor is critical in today’s parallel
+%%% processing schemes which typically struggle with cluster sizes above 16. Performers should
+%%% propose (with supporting evidence) an architecture and data flow model for which memory
+%%% latency, bandwidth, and capacity scale well with problem size.
+
+\noindent
+In large-scale graph processing, communications and synchronizations amongst nodes are often the performance bottleneck.
+To support efficient, scalable communications and synchronization amongst nodes, we propose two mechanisms:
+(1) message passing and remote function calls; and (2) dedicated synchronization unit and relaxed synchronization.
+
+\noindent
+\textbf{Message Passing and Remote Function Calls:}
+In this project communications amongst nodes, we propose a communication architecture based on message passing.
+
+The host CPU to which the entire memory address space is visible and accessible, 
+each core is restricted to access its own local memroy address space.
+Thus, 
+remote cores (i.e., cores in different chips).
+For example, a core can remotely update a property of vertices in other remote cores by sending a message that contains the target vertex ID and the computation that will be done in the remote cores.
+This is to avoid cache coherence issues among L1 data caches of cores and eliminate the need for locks to guarantee atomic updates of shared data, and facilitate the hiding of remote access latecies through asynchornous message communications.
+
+To minimize data transfers amongst remote cores, we propose to move computations to the target remote cores that contains the data to be processed.
+Building upon our proposed message passing mechanism, we propose to transfer computations as a remote function call.
+
+\noindent
+\textbf{Synchronization Unit with :} 
+In many parallel graph processing frameworks, such as Bulk Synchro-nous Parallel (BSP) model, 
+one of the significant bottlenecks to performance is the global synchronization that is necessary before moving across super-steps. 
+We propose to design a synchronization unit whose primary responsibility is to reduce this overhead. 
+As each vertex computation finishes in a super-step the sync unit tracks the progress and provides guidance for when the next super-step can begin. 
+It will track inter-vertex communications to estimate which vertices are hot (namely vertices that receive most incoming messages for processing in the next super-step). 
+This information can be later used to decide how to split vertices across nodes to reduce load imbalance. 
+
+\noindent
+\textbf{Relaxed Synchronization:} 
+% TO MURALI - do we need any dedicated hardware to support this or is this mainly runtime?
+The synchronization unit may be used to provide different levels of relaxed synchronization during graph analysis iteration. 
+The synchronization unit may monitor the progress of a super-step and may at any point decide to elide the need for further barrier waiting. 
+Instead, the next iteration (or super-step) may start even before the completion of the prior iteration. 
+Thus some vertices may compute even before all their inputs arrive. 
+We expect the eager elision of barriers will be done mostly towards the end of an iteration when some of the computing nodes become idle. 
+Hence, the overall output quality may not be impacted by our approach. 
