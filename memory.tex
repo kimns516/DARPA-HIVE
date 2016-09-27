@@ -1,3 +1,21 @@
+%%% A chip (or possibly multichip) architecture that support the easy movement of data from
+%%% memory or IOs to the accelerators based on an ``identified data flow model''. Emphasis
+%%% should be on redefining cache based architectures so that they address both sparse and
+%%% dense data sets. Integration of the processor and memory architecture may be necessary.
+
+
+%%% An external memory controller which is designed to ensure efficient us of the identified
+%%% ``data mapping tools''. The controller should be able to efficiently handle random as well as
+%%% sequential memory accesses. Every effort should be made to minimize the size of the data
+%%% access to avoid the need to pad memory. The use of advanced memory technology may
+%%% be necessary
+
+%%% How will you design a memory controller to take advantage of the data maps?
+%%% The key to efficient processing of large scale graph analytics is to ensure the locality of
+%%% information. The less you have to move the data, the more efficient the computation from both a
+%%% power and performance perspective. The memory controller needs to exploit locality regardless
+%%% of whether the dataset is sparse or dense.
+
 \noindent
 Graph algorithms are typically very memory-intensive while the memory access patterns are very random (i.e., poor sptial and temporal locality). 
 These characteristics greatly reduce the efficiency of traditional memory systems that are typically optimized for serving sequential memory requests. 
