@@ -7,13 +7,65 @@
 % Also look at ``Standards for Graph Algorithm Primitives.'' This shows that graph algorithms such as BFS can be done with sparse matrix multiplications.
 % That is, we should propose a processing pipeline that can efficiently do sparse matrix.
 
+% FP fused multiply-add units
+% specialized
+\noindent
+It has been shown that a wide range of graph algorithms can be implemented by a general case of matrix multify \textbf{C} = \textbf{A} \textit{f}().\textit{g}() \textbf{B} 
+For example, a standard (sparse) matrix-vector multiply (i.e., \textbf{C} = \textbf{A} +.$\times$ \textbf{B}) represents an one-hop BFS 
+where \textbf{A} is a $N \times N$ connectivity matrix, \textbf{B} is a $1 \times N$ vector of the starting node, 
+\textit{g}($i$, $j$) returns $a_{i,j} \times b_{j}$ and \textit{f}($i$) returns $\sum_{j=1}^{N}$ \textit{g}($i$,$j$).
+
+In this project, we aim to architect processor pipeline that can efficient support more general cases of sparse matrix multiply (Fig.~\ref{fig:acc-arch}).
+Toward this goal, we envision an MIMD architecture where 16 processors constitute a cluster.
+A cluster has two 16-bank L1 data caches to cache \textbf{A} and \textbf{B} (denoted by A- and B-cache), respectively.
+The address space partitioning set by a programmer.
+Depending on a given compressed format, either A or B will have more random accesses (e.g., B for CSR).
+In this way, we can better preserve locality of one of the caches.
+Supposing \textbf{A} is stored in CSR format, 
+The processors and A-/B-caches are connected by two 16$\times$16 crossbars (denoted by A- and B-xbars), respectively.
+Each processor is an in-order processor with a coarse-grain reconfigurable (CGR) execution unit.
+
+Accumulator-based architecture.
+the detailed cache architecture is described in Section~\ref{sec:memory}.
+
+SRUMMA algorithm
+% {index, value} = 8 bytes
+% 
+%32-bit AGU
+%32-bit ALU
+
+%(2) a 2-port 16-entry register file (RF);
+%(3) a 4KB instruction cache;
+%(3) a 4KB instruction cache;
+%-entry FIFO buffer in front of the execution unit;
+%(3) 
+
+supporting single (complex) operation per cyle in terms of its throughput  
+
+is to process elements from a (subset of) row of \textbf{A} and a (subset of) column of \textbf{B} (Fig.~\ref{fig:acc-arch}(b)).
+This is advantageous for a given \textif{f}($i$) to efficiently operate on \textbf{g}($i$, $j$).
+For efficient execution of complex \textbf{g}() and \textbf{f}(), we propose to use 
+
+(Fig.~\ref{fig:acc-arch}(c)).
+(Fig.~\ref{fig:acc-arch}(b)).
+(Fig.~\ref{fig:acc-arch}(b)).
+(Fig.~\ref{fig:acc-arch}(b)).
+
+
+its own small instruction cache
+Generally, a sparse matrix is compressed and each element is associated with row and column indices which are stored in memory.
+
+%% prefetching row and col indices?
+
+\begin{comment}
 \noindent
 \textbf{Coarse-Grained Reconfigurable Processing Engine:} 
 To efficiently execute graph primitives, we aim to architect the CGR-Core with a coarse-grain reconfigurable (CGR) array of execution units. 
 This architecture based on a spatial data-flow architecture can significantly reduce the overhead of instruction fetches and data transfers within an accelerator, as many operations for a complex graph primitive function can be executed by a single (macro) instruction and a few registerfile and/or cache accesses. 
 Furthermore, for streaming graph analytics, it is very inefficient to apply computations and changes to individual vertices as they arrive. 
+\end{comment}
 
-We propose the “update buffer” to allow CGR-Core to bulk commit messages bound for (or coming from) multiple vertices in a single phase.
+We propose the update buffer to allow CGR-Core to bulk commit messages bound for (or coming from) multiple vertices in a single phase.
 
 \noindent
 \textbf{Trailblazer:} 
