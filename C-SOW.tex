@@ -7,7 +7,7 @@ Task 1.X: Cache circuit design with spatiotemporal boosting
 
 Milestone 1.X.1: Demonstration of memory array circuits based on eDRAM (or SRAM) bitcells with spatiotemporal performance boosting capability in a 28nm CMOS technology. The memory array circuits nominally operates at low supply voltage (0.7V or lower) and the supply voltage of the portion that are accessed will be boosted to thermal-limit voltage ($\sim 1.4V$) to achieve at least 2X access throughput and 5X power efficiency improvement as compared to an array operating at nominal and static 1V supply voltage. The spatiotemporal boosting is designed to exercise under the local thermal limit with accurate temperature sensing and management. \underline{Seok (Columbia)}. 
 
-   Completion criteria and deliverables: Memory array circuit schematics, verified by SPICE-accurate simulation. 
+   Completion criteria: Memory array circuit schematics, verified by SPICE-accurate simulation. 
 
    Approach: To ease spatiotemporal boosting, we will explore circuit structures for decoders and multiplexers that are more parallel implementation while each parallel branch of decoders and multiplexers has less switching capacitance. To ensure the spatiotemporal boosting not to violate a thermal limit, we will explore to deploy non-invasive thermal sensors and a dynamic thermal management scheme based on them. By minimizing the portion whose supply voltage is boosted, we will maintain the power grid integrity of boosted supply voltage. If this is not sufficient, we will employ adaptive techniques for dynamic voltage droops such as in-situ error detection and correction (EDAC) schemes. 
 
@@ -18,7 +18,7 @@ Task 2.X: Cache physical design (layout) with fine-grained access and spatiotemp
 
 Milestone 2.X.1: Demonstration of cache circuits based on the array developed in the Task 1.X. The demonstrated cache circuits can perform narrow- and wide-width data accesses from multiple non-contiguous memory locations. \underline{Seok (Columbia), Kim (UIUC)}
 
-   Completion criteria and deliverables: functioning cache schematics, layout, and chip prototype
+   Completion criteria: functioning cache schematics, layout, and chip prototype
 
    Approach: If non-contiguous memory locations are in multiple banks, we will parallelize the accesses to hide latency penalty. If non-contiguous memory locations are in the same banks, we will leverage the throughput improvement of the spatiotemporal boosting technique for minimizing latency penalty for accessing non-contiguous memory locations. We will maximize circuit portions that are not boosted such that we can use them as thermal buffer and extend the time and spatial range of supply voltage boosting. 
 
@@ -33,7 +33,7 @@ Task 2.Y: Integration, physical design, and simulations of the accelerator chip 
 
 Task 3.X: Our accelerator chip fabrication and chip-level testing \underline{Seok (Columbia), Kim (UIUC), Hanumolu (UIUC), Annavaram (USC), Hwu (UIUC)}
 
-   Completion criteria and deliverables: fabricated chips, verified in the chip level
+   Completion criteria: fabricated chips, verified in the chip level
 
    Approach: We will perform intensive pre-silicon verifications for functional, thermal, voltage integrity, noise, and testability aspects. We will tape-out the accelerator chip in a 28nm CMOS technology. We will test the accelerator chip without DiRAMs. 
 
