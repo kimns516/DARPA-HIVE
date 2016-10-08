@@ -10,7 +10,7 @@ In contrast, graph analytics require efficient support for irregular and small g
 We tackle this problem by adopting a recent DiRAM4 3D Memory from Tezzaron and archi-tecting on-chip caches and a custom memory controller to efficiently support small granularity irregular memory accesses. 
 Specifically, DiRAM4 provides the same aggregate bandwidth as HBM2, but it provides 4× more (but narrower) channels than HBM2. 
 Exploiting this design, we propose to design a new cache architecture that efficiently supports both fine- and coarse-grained data accesses with short latency through spatial voltage boosting. 
-We will architect the DiRAM4 controller to fully exploit many narrow memory channels, to fit the graph analytics (e.g., provid-ed data-map) for more efficient bandwidth utilization.
+We will architect the DiRAM4 controller to fully exploit many narrow memory channels, to fit the graph analytics (e.g., provid-ed data-map) for more efficient bandwidth utilization. 
 
 The high-efficiency memory interface will be augmented with novel processing efficiency schemes. 
 (1) We propose a hardware unit to efficiently support relaxed synchronization techniques and thus reduce synchronization overhead. 
