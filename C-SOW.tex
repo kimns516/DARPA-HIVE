@@ -1,18 +1,61 @@
-
-
-\noindent
-\textbf{Phase 1:}
-
-Task 1.X: Cache circuit design with spatiotemporal boosting
-
-Milestone 1.X.1: Demonstration of memory array circuits based on eDRAM (or SRAM) bitcells with spatiotemporal performance boosting capability in a 28nm CMOS technology. The memory array circuits nominally operates at low supply voltage (0.7V or lower) and the supply voltage of the portion that are accessed will be boosted to thermal-limit voltage ($\sim 1.4V$) to achieve at least 2X access throughput and 5X power efficiency improvement as compared to an array operating at nominal and static 1V supply voltage. The spatiotemporal boosting is designed to exercise under the local thermal limit with accurate temperature sensing and management. \underline{Seok (Columbia)}. 
-
-   Completion criteria: Memory array circuit schematics, verified by SPICE-accurate simulation.  
-
-   Approach: To ease spatiotemporal boosting, we will explore circuit structures for decoders and multiplexers that are more parallel implementation while each parallel branch of decoders and multiplexers has less switching capacitance. To ensure the spatiotemporal boosting not to violate a thermal limit, we will explore to deploy non-invasive thermal sensors and a dynamic thermal management scheme based on them. By minimizing the portion whose supply voltage is boosted, we will maintain the power grid integrity of boosted supply voltage. If this is not sufficient, we will employ adaptive techniques for dynamic voltage droops such as in-situ error detection and correction (EDAC) schemes. 
+%1. A general description of the objective (for each defined task/activity);
+%2. A detailed description of the approach to be taken to accomplish each defined task/activity;
+%3. Identification of the primary organization responsible for task execution (prime, sub, team member, by name, etc.);
+%4. The completion criteria for each task/activity - a product, event or milestone that defines its completion.
+%5. Define all deliverables (reporting, data, reports, software, etc.) to be provided to the Government in support of the proposed research tasks/activities; AND
+%6. Clearly identify any tasks/subtasks (prime or subcontracted) that will be accomplished on-campus at a university.
 
 \noindent
-\textbf{Phase 2:}
+\textbf{Phase 1.}
+
+\noindent
+All the tasks in Phase 1 will be on-campus at UIUC, USC, and Columbia.
+
+\noindent
+\textbf{Task 1: Modeling the processing pipeline.} 
+The Annavaram's team at USC will model the proposed processing pipeline architecture in software using a programming language.
+This includes architecting coarse-grain reconfigurable execution pipeline for accelerating graph primitives requiring complex operations.
+This software code will be integrated with an architectural simulator (cf. Task 5) that integrates all the functions of the proposed accelerator.
+When the software code can successfuly run the test code derived from given benchmarks and provide the estimation of performance in terms of simulated cycles, this task is completed.
+We will deliver the completed software code, test code, and technical document describing the architecture, implementation in C++, and usage.
+
+\noindent
+\textbf{Task 2: Modeling the memory subsystem.}
+The Kim's team at UIUC will model the proposed memory system architecture in software using a programming language such as C++.
+This includes architecting (1) proposed custom SRAM-based on-chip caches private to each acceleration core; (2) a custom eDRAM-based on-chip cache shared by all the acceleration cores in a chip; and (3) a custom memory controller.
+This software code will be integrated with an architectural simulator (cf. Task 5) that integrates all the functions of the proposed accelerator.
+When the software code can successfuly run the test code derived from given benchmarks and provide the estimation of performance in terms of simulated cycles, this task is completed.
+We will deliver the completed software code, test code, and technical document describing the architecture, implementation in C++, and usage.
+
+\noindent
+\textbf{Task 3: Designing eDRAM array circuit schematic.}
+The Seok's team at Columbia will design an eDRAM array circuit in a 28nm CMOS technology.
+This includes the development of circuit structures that (1) support spatial and temporal boosting and (2) non-invasive thermal sensors and a dynamic thermal management scheme to ensure that the spatio and temporal boosting does not violate a thermal limit.
+When HSPICE can successfully simulate the the designed eDRAM array circuit and demonstrate the projected latency reduction compared with an eDRAM without the boosting technique, this task is completed.
+We will deliver the completed eDRAM circuit and testbench netlists, performance parameters needed for the architectural simulation, and technical document describing the design and HSPICE simulation results.
+
+\noindent
+\textbf{Task 4: Designing 1TBps link circuit.}
+The Hanumolu's team at UIUC will design a 1TBps link circuit in a 28nm CMOS technology.
+This includes the development of circuit structures that employ (1) injection-locking and (2) clocking techniques that improve power and area efficiency. 
+When HSPICE can successfully simulate the the designed link circuit and demonstrate the projected power-efficiency improvement compared with the state-of-the-art link circuit, this task is completed.
+We will deliver the completed link circuit and testbench netlists, performance parameters needed for the architectural simulation, and technical document describing the design and HSPICE simulation results.
+
+\noindent
+\paragraph{Task 5: Modeling the entire accelerator module.}
+The Hwu's team at UIUC will model the proposed intra- and inter-chip communication architectures and integrate the processing pipeline (Task 1) and memory subsystem (Task 2) models with the communication architectures to model the entire accelerator module in software using a programming language. 
+When the simulator software code can successfuly run the test code derived from given benchmarks with the input set fitting into the on-package memory system comprised of 4$\times$ 8GB DiRAM4 dies, and provide the estimation of performance in terms of simulated cycles, this task is completed.
+We will deliver the completed simulator code, test code, and technical document describing the architecture, implementation in C++, and usage.
+
+
+\paragraph{Phase 2.}
+
+\noindent
+\paragraph{Task 6: .}
+
+
+\paragraph{Task 6:} Integration of the proposed core in an architectural simulator (UIUC Kim \& USC Annavaram).
+\paragraph{Completion criteria and deliverables:} Memory array circuit schematics, verified by SPICE-accurate simulation.  
 
 Task 2.X: Cache physical design (layout) with fine-grained access and spatiotemporal boosting in a 28nm CMOS technology
 
