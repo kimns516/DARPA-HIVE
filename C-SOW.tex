@@ -58,9 +58,9 @@ This task is completed when we the performance simulator can successfuly run tes
 
 \noindent
 \textbf{Implement (Task-8) processing pipeline; (Task-9) memory sub-system; (Task-10) communication sub-system; and (Task-11) accelerator module.}
-Annavaram, Kim, and Hwu will perform the RTL designs of the processing pipeline, memory sub-system, and communication sub-system microarchitectures in Verilog HDL based on Tasks 1 -- 3, respectively; synthesize the RTL designs to generate gate-level netlists; and test the synthesized netlists using a gate-level simulator and a DNVUF2_HPC_PCIE FPGA development board.  
+Annavaram, Kim, and Hwu will perform the RTL designs of the processing pipeline, memory sub-system, and communication sub-system microarchitectures in Verilog HDL based on Tasks 1 -- 3, respectively; synthesize the RTL designs to generate gate-level netlists; and test the synthesized netlists using a gate-level simulator and a DNVUF2\_HPC\_PCIE FPGA development board.  
 Then they will integrate the RTL designs from Tasks 8 -- 10 to implement the entire proposed accelerator module. 
-These four tasks are completed when the synthesized netlists can successfuly run the test code used for Tasks 1 -- 4 on a DNVUF2_HPC_PCIE FPGA development board, and deliver the following items:
+These four tasks are completed when the synthesized netlists can successfuly run the test code used for Tasks 1 -- 4 on a DNVUF2\_HPC\_PCIE FPGA development board, and deliver the following items:
 (1) the completed Verilog HDL code with synthesized gate-level netlists, synthesis scripts, and simulation scripts for each task; and 
 (2) technical document describing the RTL design and expected operating frequency of the accelerator module in the target 28nm technology.
 
@@ -101,8 +101,8 @@ This task is completed when the schematic of the 2.5D connection is submitted to
 
 \noindent
 \textbf{(Task-17) Prototype a single accelerator module.}
-Kim and Annavaram will prototype a single acclerator module using DNVUF2_HPC_PCIE boards that can be connected to a host system through the PCIe interface.
-This task is completed when the host system supplies the benchmark code and its input data, run the code with the input data on DNVUF2_HPC_PCIE FPGA development boards prototyping the accelerator module, and deliver the following items:
+Kim and Annavaram will prototype a single acclerator module using DNVUF2\_HPC\_PCIE boards that can be connected to a host system through the PCIe interface.
+This task is completed when the host system supplies the benchmark code and its input data, run the code with the input data on DNVUF2\_HPC\_PCIE FPGA development boards prototyping the accelerator module, and deliver the following items:
 (1) the completed Verilog HDL code and scripts used for prototyping the accelerator module,  
 (2) technical document describing the prototyped implementation and projected performance results in the target 28nm technology.
 
@@ -136,7 +136,7 @@ the fabricated accelerator modules, accelerator system PCB, and IBM P8 system.
 This task is completed when the full accelerator system runs the test code from Task-18, and deliver the full accelerator system.
 
 
-\being{comment}
+\begin{comment}
 Task 3.X: Our accelerator chip fabrication and chip-level testing \underline{Seok (Columbia), Kim (UIUC), Hanumolu (UIUC), Annavaram (USC), Hwu (UIUC)}
 Completion criteria: fabricated chips, verified in the chip level
 Approach: We will perform intensive pre-silicon verifications for functional, thermal, voltage integrity, noise, and testability aspects. We will tape-out the accelerator chip in a 28nm CMOS technology. We will test the accelerator chip without DiRAMs. 
