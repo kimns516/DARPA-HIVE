@@ -8,6 +8,32 @@
 %%% latency, bandwidth, and capacity scale well with problem size.
 
 \noindent
+Scaling a GAMA tile to a 16-node GAMA system will face several challenges. First challenge is the load balancing across various  GAMA tiles. There are two sources of load imbalance. Assuming each tile may be assigned an equal number of vertices to process, but due to power law distribution some vertices may have significantly more number of edges to process. The second source of imbalance is the barrier synchronization that may be enforced at the end of each iteration. For instance, to compute betweenness centrality one approach may use all  pairs shortest paths which must be computed first in parallel. Only then it is possible to precisely calculate the centrality of each vertex across all paths. 
+
+
+In a compressed sparse row (CSR) or column (CSC) representation it is easy to detect the number of non-zero entries in a row or column.  This row size can be easily inferred from the row pointer vector in CSR, but the column size may not be inferred easily. For instance, finding the number of non-zero elements in column one requires scanning the column index vector to find all the "1"s that represent the first column values.  We plan to augment each matrix with additional metadata bits to mark the number of non-zero rows and columns in a given matrix. Note that these are computed during the  initial data placement in memory or when intermediate matrices are generated. These counts are only approximate since we do not plan to update them with any new edge or vertex additions. Assuming graph structure changes slowly over time we believe these approximate counters provide good first order estimate for how much computation may be assigned to a given tile or a corelet within a tile. We propose to assign  corelets for processing a vertex in proportion to the edge counts. However this assignment needs to be monitored at runtime due to varying memory access delays. Even if the edge counts across two vertices are the same, namely the two sparse rows have similar number of non-zero entries, a given row may be distributed across tiles leading to access latency imbalance. Hence, we will monitor how different tiles and corelets are  progressing to identify excessive imbalances. We will rely on a simple performance counting register that counts the number of load operations completed to monitor progress. These counters may be accessed by the higher layer runtime to do computation migration and dynamic load balancing. %MURALI: SHOULD WE BE DOING ANY MIGRATION ASSISTANCE? 
+
+We also propose to monitor the edge connectivity of result matrices after a computation is complete. For instance, the occurrence of a hot vertex after a graph computation step can be identified by a significant change in the row sparsity corresponding to that hot vertex. Hence, we propose to provide additional monitoring registers in the GAMA tiles to measure the sparsity changes in each row. During a matrix-matrix computation, for example, we can track the change in sparsity of each row as the computation progresses. While maintaining this information across all vertices has high performance and memory overhead, we will only maintain this information for only a few vertices per each corelet as an approximation. The significant change in sparsity can be used while distributing work across GAMA tiles in the next iteration of a the graph algorithm.    
+
+With a best effort load balancing scenario we expect that some GAMA tiles  will still be doing uneven amounts of work when dealing with very dynamic graphs.  We  propose to develop hardware hooks for enabling the application developer to consider relaxed synchronization approaches in these scenarios. When a GAMA tile is waiting at a barrier synchronization for all the tiles to finish their computation it reduces efficiency. Eliding the barrier is one approach to  improve efficiency. It has been shown in prior work that relaxed synchronization provides a tradeoff between convergence speed and resource usage efficiency and these works showed that relaxation improves performance without impacting  convergence.  We propose to allow the application developer to specify relaxed synchronization constraints on barrier synchronization. The programmer may specify the degree of relaxation that may be allowed across GAMA tiles before eliding the barrier. For instance, the programmer may specify elision after each GAMA tile has done at least 95\% of their computation during a iteration. The hardware then uses this information to automatically trigger a notification to software (such as through an exception) when all the GAMA tiles reach 95\% of their computation. The programmer can decide how to handle elision as part of the exception handling mechanism.  For elision, the hardware will track the progress of a given matrix operation. For a matrix-matrix multiplication operation the approximate size (number of non-zero elements) of each matrix  (stored as  metadata) is used to determine how many vertices may have been processed across all GAMA tiles periodically. That information is then gathered by a single GAMA tile that acts as a master tile, or the P8 host system to track progress. 
+
+%For instance, one well known approach for graph clustering uses peer pressure based clustering. Every vertex votes to keep its neighbors in its own cluster and the weight of the vote is inversely proportional to edge connectivity. Based on the weighted votes the clusters are refined iteratively. But this algorithm can be represented using a matrix multiplication followed by a max computation on each iteration. The max operation waits on the parallel matrix operation to complete before computing the max. But in a relaxed synchronization approach the max computation may be initiated even before the matrix multiply operation completes. The resulting max computation may not be 
+
+%centrality computation all pairs shortest paths may need to be computed before finding the most common vertex across all paths. Such an algorithm requires a parallel matrix-matrix multiplication
+
+\begin{comment}
+
+
+%the number of vertices in a each shortest path will determine how much computation is needed to determine the betweenness centrality in the second phase of computation. If each  
+
+%The initial responsibility of data and computation distribution across the tiles lies with the software.  As discussed earlier, the hardware provides programming interfaces to aid the developer specify the dominant matrix access patterns. However, the hardware
+
+%which will be used by the hardware to decide bank and channel interleaving of data. However, 
+%Existing literature for parallel algorithms discusses the idea of data replication to reduce communication cost by C^1/2 or C^1/3   
+
+
+%Since the GAMA system will use a distributed shared memory architecture requests that cross the tile boundaries will be 
+
 In large-scale graph processing, communications and synchronizations amongst nodes are often the performance bottleneck.
 To support efficient, scalable communications and synchronization amongst nodes, we propose two mechanisms:
 (1) message passing and remote function calls; and (2) dedicated synchronization unit and relaxed synchronization.
@@ -35,12 +61,4 @@ As each vertex computation finishes in a super-step the sync unit tracks the pro
 It will track inter-vertex communications to estimate which vertices are hot (namely vertices that receive most incoming messages for processing in the next super-step). 
 This information can be later used to decide how to split vertices across nodes to reduce load imbalance. 
 
-\noindent
-\textbf{Relaxed Synchronization:} 
-% TO MURALI - do we need any dedicated hardware to support this or is this mainly runtime?
-The synchronization unit may be used to provide different levels of relaxed synchronization during graph analysis iteration. 
-The synchronization unit may monitor the progress of a super-step and may at any point decide to elide the need for further barrier waiting. 
-Instead, the next iteration (or super-step) may start even before the completion of the prior iteration. 
-Thus some vertices may compute even before all their inputs arrive. 
-We expect the eager elision of barriers will be done mostly towards the end of an iteration when some of the computing nodes become idle. 
-Hence, the overall output quality may not be impacted by our approach. 
+\end{coment}

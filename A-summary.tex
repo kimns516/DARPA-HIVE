@@ -1,103 +1,21 @@
 \noindent
-Graph processing is a critical component in a broad range of applications ranging from  social network analysis, medical diagnostics, and drug interaction studies. 
-Given the vast size of these graphs with billions of edges and vertices, graph analytics will likely become the most challenging workload to execute efficiently for computing systems in the near future. 
-While there are multiple contending approaches to process graphs, in this proposal we treat graph analytics as linear algebraic problem formulations. 
-This approach represents graphs as adjacency matrices, and many well known graph algorithms are transformed into matrix operations. 
-The evolving duality between graph algorithms and their equivalent matrix operations forms a solid basis for designing computing systems that can efficiently manipulate matrix operations. 
-For example, there are well known linear algebraic problem formulations for graph algorithms such as breadth first search, strongly connected components, shortest paths, stress centrality, betweenness centrality,  sub-graph detection and so on. 
-Given such a wide range of graph algorithms there is an equally diverse range of matrix manipulations that must be supported in hardware for efficiently solving their corresponding linear algebraic formulation. 
-These operations include matrix multiplication, Kronecker product,  matrix decomposition, inner and outer products, matrix inversion, matrix transpose and Eigen value computation. 
-Supporting such a broad range of operations on extremely large matrices is the first challenge that will be tackled in this proposal. 
+Graph processing is an important tool to enhance our understanding of an increasingly complex and interconnected social world. Inferring relationships between entities (or social actors), particularly going beyond the obvious edges between vertices one may see in a graph, is a computationally challenging task. This proposal focuses on executing graph algorithms as linear algebraic computations. This approach represents graphs as adjacency matrices, and many well known graph algorithms are transformed into matrix operations. The evolving duality between graph algorithms and their equivalent matrix operations forms a solid basis for designing computing systems that can efficiently manipulate matrix operations. 
 
-An equally daunting challenge is the representation of large graphs as adjacency matrices in memory. 
-Large graphs are extremely sparse and there is strong evidence that many large graphs today exhibit power law distributions. 
-For instance, only a few vertices in a graph have very high edge count. 
-Several representations have been developed to improve the storage efficiency of sparse graphs. 
-For instance, double compressed sparse row and column (DCSR and DCSC) representations have been proposed for space efficiency. 
-But such space efficient representations lead to highly irregular memory access streams. 
-Compressed sparse row and column representations provide more predictable access streams but they provide lower compression ratio thereby requiring more data to be accessed for the same computation. 
-In all these cases memory access bandwidth often becomes the primary performance bottleneck.  
-While processing-in-memory (PIM) offers high bandwidth, memory access patterns in graph analytics make existing PIM based acceleration schemes ineffective. 
+\textbf{Approach and Cross-layer Innovations:} 
+We propose to build an accelerator architecture, called GAMA (Graph Acceleration through Matrix Abstraction), to tackle critical challenges of graph processing. We will develop a graph processor architecture that can support a broad range of matrix manipulations through coarse grain reconfiguration of the execution pipeline. Given that graph algorithms place an enormous stress on memory subsystem, we will develop a new processing-in-memory tile, called the GAMA tile, where each graph processor is 2.5D stacked with 8GB of DiRAM4 from Tezzaron. We design elastic cache architecture that exploits the DiRAM4's unique properties of providing many more but narrow memory channels. Our elastic cache design supports both sparse and dense matrix accesses with relative ease. We will augment the DiRAM4 memory with additional metadata information which stores semantic information related to the matrix representation and expected access patterns to a given matrix.   
 
-%The difficulty is further compounded by the fact that different sparse representations are suited for different kinds of graphs. A given graph connectivity which translates into a corresponding sparsity distribution prefers one data representation over the other.  While the data representation is the responsibility of the application programmer it is also imperative for the hardware to map the preferred data representation to the underlying memory hierarchy  is stored. The utility of a graph for answering particular questions is usually dictated by the vertex/edge schema. The more specific the schema, the better it will be at addressing a specific question. 
+We design a high performance interconnect architecture to enable inter-tile communication. We will use  charge-based and injection-locking techniques for designs high-speed links.  Using these high speed links we will interconnect 16 GAMA tiles in a GAMA system. We propose to build multiple enabling technologies to scale graph algorithms to 16 GAMA tiles. In particular, we will use hardware counters to measure load imbalances across GAMA tiles and provide an interface for software to decide on load migration strategies. We also propose to develop hardware hooks to monitor barrier synchronization stalls and allow the application developer to specify when it is acceptable for a GAMA tile to elide a barrier. 
 
-Finally, scaling the execution of linear algebraic manipulations through parallelization is the last challenge that this proposal tackles. 
-Parallel execution of matrix operations can be mapped to various distributed computing paradigms, such as Mapreduce, Pregel and Parallel-R. 
-In these distributed paradigms each iteration of a operation, such as a single iteration of LU decomposition, is mapped to multiple nodes and when the iteration completes a new distributed task may be launched for the second iteration.   
-Almost all these paradigms divide the sparse matrix data across multiple compute nodes. 
-For instance, many PGAS (partitioned global address space) approaches distribute equal number of vertices across nodes (equal number of rows from the adjacency matrix). 
-But when vertex degrees exhibit power law distribution it  is extremely difficult to balance the load across computational nodes. 
-For instance, parallel performance of a mapreduce algorithm will be determined the long tail distribution of the map tasks.  
-Tackling these imbalances require dynamically remapping data during different iterations. 
-Such remapping schemes demand high bandwidth overheads. 
-Launching a  new iteration of the computation traditionally requires the previous iteration to complete, thereby forcing a barrier synchronization across various threads. 
-In the presence of load imbalances such synchronizations curtail scaling. 
-Hence, new hardware based schemes must be explored to provide stochastic approaches to iterative computing.    
+We will be collaborating with Tezzaron, eSilicon and IBM on this project. Tezzaron will provide the DiRAM4 designs and integration path for graph processor. eSilicon will do the 2.5D integration and chip fabrication. IBM will provide Power 8 CAPI interface specification for integrating the GAMA tiles with a P8 host processor. 
 
-%After the map jobs complete then shuffling the required data across multiple compute nodes is necessary to initiate the reduction process. But data shuffling costs can be traded with additional computational costs at 
- 
-%of matrices over many compute nodes. Decomposition of array into parallel regions. Map layout 
+\textbf{Success Metrics:} 
+We will use the following metrics for evaluations; note that these metrics are evaluated on simulators in Phase 1, FPGA on Phase 2 and on real chip by Phase 3.  We aim to achieve a reconfiguration penalty of no more than XX cycles in the graph processor, and energy consumption of XX nanoJoules per floating point multiply accumulate operation. For the memory system we aim for XX\% improvement in cache hit rate with elastic cache, achieve 95\% of peak bandwidth of DiRAM4 (4 TB/s), and average memory access latency of XX cycles, and less than 1\% memory overhead to store the metadata.
 
-%Block rows with overlap PGAS provides some data to be overlapped across multiple regions. Could be used for coded map reduce options if we are to explore that.
+For the inter-tile interconnect we expect to achieve per lane power efficiency in the order of 1mW/Gb/s and bandwidth of 1TB/s between two tiles. We will provide a remote memory access latency of XX cycles for cross-tile data transfer. Through active monitoring of load imbalance and workload migration we expect to achieve 90\% scaling efficiency as we scale from 1 to 16 tiles. When the programmer is able to use relaxed synchronization appropriately we expect to gain super-linear performance scaling without any loss in accuracy or increased  
 
-%PGAS remapping of data for dynamic data load distribution equally.
+%MURALI: DO WE NEED TO SAY ANYTHING ABOUT THE CHIP ITSELF IN TERMS OF TIMING, NOISE, GUARD BANDS ETC.,
 
-%On the algorithmic front, graph analytics require significant interconnect bandwidth and synchronization support leading to massive slowdowns and load imbalances during computations. 
-These observations lead to the main research thrusts of this proposal, as described below.
+\textbf{Per Phase Cost:} 
+Phase 1 has a total cost of $XX million. Phase 2 has a total cost of $XX million and Phase 3 costs are $XX million.
 
-First, we propose to design an accelerator architecture that is ideally suited for matrix manipulations. 
-The accelerator core will be architected with a coarse-grain reconfigurable array of execution units so that operations for a complex graph primitive function can be executed by a single instruction and memory access in a data-flow manner within an accelerator. 
-To efficiently support streaming graph analytics, we propose ``updated buffer'' which allows an accelerator core to apply computations and changes to a batch of vertices rather than individual vertices. 
-% NAM: SAY ANYTHING MORE ABOUT THE ACCELERATOR PIPELINE   
-
-In order to fully utilize the accelerator pipeline we must tackle the challenge of supplying matrix data as input to the accelerator pipeline. 
-The bandwidth demands for this approach far exceed traditional DRAM interfaces. 
-Hence, we propose to explore recently available high bandwidth memory interfaces.  
-But when matrices are represented in compressed format the resulting accesses are highly irregular.  
-The difficulty is further compounded by the fact that different sparse representations are suited for different kinds of graphs. 
-A given graph connectivity which translates into a corresponding sparsity distribution prefers one data representation over the other.  
-While the data representation is the responsibility of the application programmer it is also imperative for the hardware to understand the semantics of data representation and use that information for data access. 
-We propose to explore processing near high bandwidth memory option to enable the processing layer to understand the semantics of data representation and use appropriate (pre)fetching and caching mechanisms.   
-High bandwidth memory (HBM) and hybrid memory cube (HMC) used for recent PIM architectures can provide high bandwidth only for sequential, regular memory accesses. 
-In contrast, graph analytics require efficient support for irregular and small granularity memory accesses. 
-We tackle this problem by adopting a recent DiRAM4 3D Memory from Tezzaron and architecting on-chip caches and a custom memory controller to efficiently support small granularity irregular memory accesses. 
-Specifically, DiRAM4 provides the same aggregate bandwidth as HBM2, but it provides 4$\times$ more (but narrower) channels than HBM2.  
-Exploiting this design, we propose to design a new cache architecture that efficiently supports both fine- and coarse-grained data accesses with short latency through spatial voltage boosting. 
-We will architect the DiRAM4 controller to fully exploit many narrow memory channels, to fit the graph analytics (e.g., provided data-map) for more efficient bandwidth utilization.
-
-As described earlier, scalability of parallel graph algorithms is bottlenecked by the need to shuffle data after  map tasks complete their local computations.  
-But data shuffling costs can be traded with additional computational costs by allowing each map task to potentially do extra computations. 
-There are known approaches to coded computation that have been developed recently that may be used to reduce the communication costs. 
-In addition, it has been shown previously that some of the synchronization costs can be eliminated by allowing distributed graph processing tasks to operate on partially completed computations or incomplete inputs. 
-We propose a hardware unit to efficiently support such relaxed synchronization techniques and thus reduce synchronization overhead. 
-
-Apart from relaxed synchronization scalability can also be enhanced by predicting data access patterns. 
-We will design a trailblazer threads to exploit the repeated computations across multiple vertices to learn about data access patterns and opportunistically bring anticipated data from other PIM packages or the main memory of the host system.
-
-Lastly, a PIM package integrating HBM, HMC, and even DiRAM4 with accelerators can provide only limited memory capacity per channel as they use point-to-point interconnects.  
-For large graphs this requires frequent data transfers from/to the large main memory of the host system and/or other PIM packages.  
-This demands many high-bandwidth links, posing power, thermal, and signal integrity challenges.  
-We tackle this challenge with various charge-based and injection-locking techniques for high-speed links.
-
-%Two kinds of graph patterns: static and temporal. Static include degree distribution, scree plot (eigenvalues vs. rank), distribution of components of principal eigenvector. Temporal include diameter over time and densification power law.
-\begin{comment}
-First, high bandwidth memory (HBM) and hybrid memory cube (HMC) used for recent PIM architectures can provide high bandwidth only for sequential, regular memory accesses. 
-In contrast, graph analytics require efficient support for irregular and small granularity memory accesses. 
-We tackle this problem by adopting a recent DiRAM4 3D Memory from Tezzaron and archi-tecting on-chip caches and a custom memory controller to efficiently support small granularity irregular memory accesses. 
-Specifically, DiRAM4 provides the same aggregate bandwidth as HBM2, but it provides 4× more (but narrower) channels than HBM2. 
-Exploiting this design, we propose to design a new cache architecture that efficiently supports both fine- and coarse-grained data accesses with short latency through spatial voltage boosting. 
-We will architect the DiRAM4 controller to fully exploit many narrow memory channels, to fit the graph analytics (e.g., provid-ed data-map) for more efficient bandwidth utilization. 
-
-The high-efficiency memory interface will be augmented with novel processing efficiency schemes. 
-(1) We propose a hardware unit to efficiently support relaxed synchronization techniques and thus reduce synchronization overhead. 
-(2) The accelerator core will be architected with a coarse-grain reconfigurable array of execution units so that operations for a complex graph primitive function can be executed by a single instruction and memory access in a data-flow manner within an accelerator. 
-(3) To efficiently support streaming graph analytics, we propose “updated buffer” which allows an accelerator core to apply computations and changes to a batch of vertices rather than individual vertices. 
-(4) We design a trailblazer core to exploit the repeated computations across multiple vertices to learn about data access patterns and opportunistically bring anticipated data from other PIM packages or the main memory of the host system.
-
-Lastly, a PIM package integrating HBM, HMC, and even DiRAM4 with accelerators can provide only limited memory capacity per channel as they use point-to-point interconnects. 
-For large graphs this requires frequent data transfers from/to the large main memory of the host system and/or other PIM packages. 
-This demands many high-bandwidth links, posing power, ther-mal, and signal integrity challenges. 
-We tackle this challenge with various charge-based and in-jection-locking techniques for high-speed links.
-\end{comment}
-
-%map the preferred data representation to the underlying memory hierarchy  is stored. The utility of a graph for answering particular questions is usually dictated by the vertex/edge schema. The more specific the schema, the better it will be at addressing a specific question. 
+%MURALI FILL ALL XXs. ALSO CHECK IF OUR PARTNERSHIP STUFF WITH COMPANIES IS CORRECT.
