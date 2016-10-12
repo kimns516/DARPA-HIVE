@@ -39,7 +39,7 @@ These tasks are completed when HSPICE can successfully simulate the netlists fro
 
 
 \noindent
-\textbf{(Task-7) Model the entire accelerator module.}
+\textbf{(Task-7) Model the accelerator module.}
 Hwu, Kim, and Annavaram will integrating the models from Tasks 1 -- 4 to model the entire proposed accelerator module and and its performance in software. 
 This task is completed when we the performance simulator can successfuly run test code derived from given benchmarks with the input set fitting into the 4$\times$ 8GB DiRAM4 dies; provide performance in terms of simulated cycles; and deliver the following items:
 (1) the completed performance simulator software code with the test code; and (2) technical documents depicting architecture diagrams and performance simulator implementation with the simulator usage.
@@ -47,29 +47,36 @@ This task is completed when we the performance simulator can successfuly run tes
 
 \noindent
 \textbf{Phase 2.}
+%- (X) Implement and refine chip architecture (based on TA2 feedback from simulator) to address current memory bottlenecks for sparse data acceleration of graph primitives
+%- (X) Update dataflow model / architecture scalable to a 16 nodes with anticipated performance numbers
+%- (X) Develop system level scaling model including electrical, mechanical, and thermal needs
+%
+%-Output:
+% (X) Updated block diagram and schematic of graph processor
+% (X) PCB/FPGA prototype of chip and performance results on graph benchmarks /primitives (for TA2 to use for toolkit development)
+% (X) GDS2 file in preparation for fabrication
 
 \noindent
-\textbf{Implement (Task-8) processing pipeline; (Task-9) memory sub-system; and (Task-10) communication sub-system}
-Annavaram, Kim, and Hwu will implement the processing pipeline, memory sub-system, and communication sub-system microarchitectures 
-based on Tasks 1 -- 3, respectively.
+\textbf{Implement (Task-8) processing pipeline; (Task-9) memory sub-system; (Task-10) communication sub-system; and (Task-11) accelerator module.}
+Annavaram, Kim, and Hwu will perform the RTL designs of the processing pipeline, memory sub-system, and communication sub-system microarchitectures in Verilog HDL based on Tasks 1 -- 3, respectively; synthesize the RTL designs to generate gate-level netlists; and test the synthesized netlists using a gate-level simulator and a DNVUF2_HPC_PCIE FPGA development board.  
+Then they will integrate the RTL designs from Tasks 8 -- 10 to implement the entire proposed accelerator module. 
+These four tasks are completed when the synthesized netlists can successfuly run the test code used for Tasks 1 -- 4 on a DNVUF2_HPC_PCIE FPGA development board, and deliver the following items:
+(1) the completed Verilog HDL code with synthesized gate-level netlists, synthesis scripts, and simulation scripts for each task; and 
+(2) technical document describing the RTL design and expected operating frequency of the accelerator module in the target 28nm technology.
 
 
 \noindent
-\textbf{(Task-11) Implement the entire accelerator module.}
-Hwu, Kim, and Annavaram will integrating the processing pipeline, memory sub-system, and communcation sub-system from Tasks 8 -- 10 to implement the entire proposed accelerator module. 
-
-
-\noindent
-\textbf{Tasks 8}, \textbf{9}, \textbf{10}, and \textbf{11} include the RTL designs in Verilog HDL, synthesis of the designs to generate gate-level netlists, and test of the synthesized netlists using a gate-level simulator and an FPGA development board.
-These four tasks are completed when the synthesized netlists can successfuly run the test code used in Tasks 1 -- 4 in an FPGA development board and deliver the following items:
-(1) the completed Verilog HDL code with synthesized gate-level netlists, synthesis scripts, simulation scripts for each task; and (2) technical document describing the RTL design and expected operating frequency of the accelerator module in the target 28nm technology.
-
-
-\noindent
-\textbf{(Task-12) Refine the accelerator module architecture.} 
-Hwu, Kim, and Annavaram will refine the architecture of the accelerator module and microarchitectures of accelerator components after analyzing the performance of the accelerator module with the architectural simulator refined by the synthesis results.
-This task is completed when the inaccurate architectural models and their parameters are updated based on the synthesis results; the architecture and microarchitectures are improved based on the simulations using the updated architectural simulator; the RTL designs are updated accordingly; and deliver the following items:
-(1) the improved architectural simulator software code, RTL designs, synthesized gate-level netlists, and synthesis scripts; and (2) technical document describing the improvement and updated performance projection.
+\textbf{(Task-12) Refine the accelerator module.} 
+Hwu, Kim, and Annavaram will refine the architecture of the accelerator module, the microarchitectures of the accelerator and its sub-systems, and the RTL designs, after analyzing the performance of the accelerator module with the architectural simulator refined by the synthesis results.
+Then they will enhance the architectural simulator to simulate 16 accelerator modules.
+This task is completed when 
+the architecture and microarchitectures are improved based on the simulations using the architectural simulator; 
+the RTL designs are updated accordingly; and
+the architectural simulator is enhanced to simulate 16 accelerator modules; and 
+deliver the following items:
+(1) the refined RTL designs, synthesized gate-level netlists, and synthesis scripts; 
+(2) the enhanced architectural simulator software code; and
+(3) technical document describing the enhanced architecture and microarchitectures with updated performance projections.
 
 
 \noindent
@@ -81,42 +88,62 @@ These tasks are completed when HSPICE can successfully simulate the post-layout 
 
 \noindent
 \textbf{(Task-15) Perform the physical design of the accelerator.} 
-Seok at Columbia with Hanumolu at UIUC will design on-chip testing circuits including boundary scan-chains, on-chip clock generators and built-in-self-test (BIST) blocks, and perform their physical design.
+Seok with Hanumolu will design on-chip testing circuits including boundary scan-chains, on-chip clock generators and built-in-self-test (BIST) blocks, and perform their physical design.
 Then, they will integrate the physical design of the on-chip testing circuits and the with that of the eDRAM cache, 1TBps link, synthesized processing pipeline, on-chip memory sub-system and communication sub-system blocks, and third-party hard IP blocks such as PCIe PHY and PLL.
-Lastly, they will design the connection structures in the accelerator die for 2.5D integration. 
-This task is completed when the DRC- and LVS-clean GDS2 is generated and submitted to the foundry, and the post-layout fast timing, power and signal integrity simulations meet our expectations.
+This task is completed when the DRC- and LVS-clean GDS2 file is generated and submitted to the foundry, and the post-layout fast timing, power and signal integrity simulations meet our expectations.
 
 
 \noindent
-\textbf{Task 16: FPGA-prototype a single accelerator connected with a host system.}
+\textbf{(Task-16) Design the 2.5D connection.} 
+Seok with Hanumolu will design the 2.5D connection between the accelerator and DiRAM4 dies.
+This task is completed when the schematic of the 2.5D connection is submitted to the packaging company, and the power and signal integrity simulations meet our expectations.
 
-We use .. FPGA development boards that can be connected to a host system to prototype
 
 \noindent
-\textbf{Task 17: Preparing a PCB board schematic for 16 accelerators.}
-The board design will be subcontacted to Nallatech.
-When 
+\textbf{(Task-17) Prototype a single accelerator module.}
+Kim and Annavaram will prototype a single acclerator module using DNVUF2_HPC_PCIE boards that can be connected to a host system through the PCIe interface.
+This task is completed when the host system supplies the benchmark code and its input data, run the code with the input data on DNVUF2_HPC_PCIE FPGA development boards prototyping the accelerator module, and deliver the following items:
+(1) the completed Verilog HDL code and scripts used for prototyping the accelerator module,  
+(2) technical document describing the prototyped implementation and projected performance results in the target 28nm technology.
+
+
+\noindent
+\textbf{(Task-18) Develop a system for 16 accelerator modules.}
+Kim with Seok and Hanumolu will work with Nallatech (sub) and IBM (collaborator) to develop a PCB that will mount 16 accelerator modules and be connected with an IBM P8-based system through the OpenCAPI interface.
+This task is completed when the full PCB schematic design is submitted for a fabrication, and deliver the following items:
+(1) the PCB schematic, and
+(2) technical documents describing the PCB schematic design including its electrical, thermal, and power needs, connection between the PCB board and the IBM P8-based system, 
+system setup, software code for interfacing between the PCB and the host system, test code, and test details. 
 
 
 \noindent
 \textbf{Phase 3:}
+%-Bring up and test chip fab
+%-Identify any bugs that can be worked around with software
+%-Identify any bugs which require a chip re-spin
+%-Build and test system at scale (16 nodes)
+%-Output: Deliver test board with silicon and scale system (16 nodes) to TA3 for testing of toolkits
 
 \noindent
-\textbf{Task : 2.5D-integrating an accelerator die with DiRAM dies.}
+\textbf{(Task-19) 2.5D-integrate accelerator and DiRAM4 dies.}
+Kim with Seok and Hanumolu will work with Global Foundry (sub) for the 2.5D integration.
+
 
 \noindent
-\textbf{Task : Build.}
+\textbf{(Task-20) Build and bring up the system.}
+Annavaram with Kim, Seok, and Hanumolu will put together an accelerator system by assembling
+the fabricated accelerator modules, accelerator system PCB, and IBM P8 system.
+This task is completed when the full accelerator system runs the test code from Task-18, and deliver the full accelerator system.
 
 
-
+\being{comment}
 Task 3.X: Our accelerator chip fabrication and chip-level testing \underline{Seok (Columbia), Kim (UIUC), Hanumolu (UIUC), Annavaram (USC), Hwu (UIUC)}
-
-   Completion criteria: fabricated chips, verified in the chip level
-
-   Approach: We will perform intensive pre-silicon verifications for functional, thermal, voltage integrity, noise, and testability aspects. We will tape-out the accelerator chip in a 28nm CMOS technology. We will test the accelerator chip without DiRAMs. 
-
+Completion criteria: fabricated chips, verified in the chip level
+Approach: We will perform intensive pre-silicon verifications for functional, thermal, voltage integrity, noise, and testability aspects. We will tape-out the accelerator chip in a 28nm CMOS technology. We will test the accelerator chip without DiRAMs. 
 Task 3.2: 2.5D integration of our accelerator chip and memory stacks, packaging, and testing \underline{?}
-
-   Completion criteria and deliverables: Functioning 2.5D integrated hardware of the accelerators and DiRAMs. 
-
-   Approach:  We will integrate the accelerator chip with two DiRAMs using a silicon interposer. The silicon interposer that creates 2,000 connection to the accelerator chip per DiRAM will be fabricated by a company (XXXXX). The interposer will be either connected to a custom PCB directly or enclosed on a BGA type package. If necessary, we will mount a off-the-shelf cooler, potentially modified to fit, on top of the accelerator chip. 
+Completion criteria and deliverables: Functioning 2.5D integrated hardware of the accelerators and DiRAMs. 
+Approach:  We will integrate the accelerator chip with two DiRAMs using a silicon interposer. 
+The silicon interposer that creates 2,000 connection to the accelerator chip per DiRAM will be fabricated by a company (XXXXX). 
+The interposer will be either connected to a custom PCB directly or enclosed on a BGA type package. 
+If necessary, we will mount a off-the-shelf cooler, potentially modified to fit, on top of the accelerator chip. 
+\end{comment}
