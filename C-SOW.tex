@@ -5,6 +5,7 @@
 %5. Define all deliverables (reporting, data, reports, software, etc.) to be provided to the Government in support of the proposed research tasks/activities; AND
 %6. Clearly identify any tasks/subtasks (prime or subcontracted) that will be accomplished on-campus at a university.
 
+\begin{comment}
 \noindent
 All the tasks in Phases 1, 2, and 3 will be performed on-campus at UIUC, USC, and Columbia, unless specified otherwise.
 
@@ -12,19 +13,70 @@ All the tasks in Phases 1, 2, and 3 will be performed on-campus at UIUC, USC, an
 \subsection{Phase 1}
 
 \noindent
-\textbf{(Task-1) Architect the accelerator module.} 
-Kim at UIUC (prime) and Annavaram at USC (sub) with Hwu at UIUC (prime) will define the instruction set and overall architecture of the accelerator and implement the functional simulator of the accelerator module in software.
+\textbf{Task 1:  GAMA ISA} 
+Hwu will define the instruction set and overall architecture of the GAMA tile, and implement the functional simulator of the tile.
+
+%This task is completed when the functional simulator can run test code. We will deliver:  (1) functional simulator code; and (2) technical documents describing the instruction set, architecture diagrams, and simulator implementation with the simulator usage.
+
+\noindent
+\textbf{Task 2: Architect the Corelet} 
+
+Sub-Task 2.1 Corelet pipeline:
+Kim will design a coarse-grain reconfigurable execution pipeline of the corelet. A detailed microarchitectural simulator of corelet will be developed. 
+
+Sub-Task 2.2:  Elastic cache:
+Kim will design Elastic cache architecture and integrate the design with the corelet microarchitectural simulator. 
+
+\noindent
+\textbf{Task 3: Architect the  memory hierarchy} 
+
+Sub-Task 3.1:  DiRAM4 matrix layout and metadata:
+Annavaram will design the memory layout of both dense and sparse matrices and will design the metadata organization for placement in DiRAM4. The design will be integrated into DRAMsim simulator which will driven by 
+
+Sub-Task 3.2:  API design to enable developer-memory interaction: 
+Annavaram will design the instruction set to be used by the API for programmer's to specify the dominant access mechanisms for each input matrix. 
+
+\noindent
+\textbf{Task 4: Architect the 1TBps links} 
+Hanumolu will implement I/O interconnect that enables processor-memory communication with a bandwidth in excess of 1TB/s using robust highly digital clocking and signaling architectures amenable for rapid implementation in a 28nm CMOS technology. 
+The design will be implemented in HSPICE to simulate the netlists, as well as a bandwidth/latency simulator modeled in software.
+
+\noindent
+\textbf{Task 5: Architect the eDRAM cache} 
+Seok will implement an eDRAM array circuit that (1) supports spatial and temporal boosting; (2) an adpative technique for power-grid integrity in boosting; and (3) non-invasive thermal sensors and a dynamic thermal management schemes. The design will be implemented in HSPICE as well as a timing simulator modeled in software. 
+
+\noindent
+\textbf{Task 6: Design integration into simulator} 
+The corelet microarchitecture simulator will be integrated with elastic cache simulator, eDRAM cache simulator and DRAMsim.  16 tiles will be integrated with 1TBps link and the entire simulator is configured to run GAMA in the simulation mode 
+
+%1. A general description of the objective (for each defined task/activity);
+%2. A detailed description of the approach to be taken to accomplish each defined task/activity;
+%3. Identification of the primary organization responsible for task execution (prime, sub, team member, by name, etc.);
+%4. The completion criteria for each task/activity - a product, event or milestone that defines its completion.
+%5. Define all deliverables (reporting, data, reports, software, etc.) to be provided to the Government in support of the proposed research tasks/activities; AND
+%6. Clearly identify any tasks/subtasks (prime or subcontracted) that will be accomplished on-campus at a university.
+\end{comment}
+
+\noindent
+All the tasks in Phases 1, 2, and 3 will be performed on-campus at UIUC, USC, and Columbia, unless specified otherwise.
+
+\noindent
+\subsection{Phase 1}
+
+\noindent
+\textbf{(Task-1) ISA definition of the GAMA corelet} 
+Kim at UIUC (prime) and Annavaram at USC (sub) with Hwu at UIUC (prime) will define the instruction set and overall architecture of the GAMA corelet, and implement the functional simulator of the corelet in software.
 This task is completed when the functional simulator can run test code and deliver the following items: 
 (1) the completed software code for the functional simulator with the test code; and (2) technical documents depicting the instruction set, architecture diagrams, and simulator implementation with the simulator usage.
 
 
 \noindent
-\textbf{Model (Task-2) processing pipeline; (Task-3) memory sub-system; and (Task-4) communication sub-system.}
-Annavaram, Kim, and Hwu will model the microarchitecture and performance of 
-(Task-2) (1) coarse-grain reconfigurable execution pipeline and (2) ...; 
+\textbf{Model (Task-2) GAMA corelet's processing pipeline; (Task-3) GAMA tile memory system; and (Task-4) communication sub-system.}
+Annavaram, Kim, and Hwu will model the detailed microarchitecture and performance of Task-2, Task-3 and Task-4, respectively.  
+(Task-2) (1) Coarse-grain reconfigurable execution pipeline and (2) Elastic cache design private to each corelet; (2) Elastic eDRAM cache shared by all corelets; 
 % TODO: need to elaborate when the architecture is finalized
-(Task-3) (1) custom SRAM-based on-chip caches private to each acceleration core; (2) a custom eDRAM-based on-chip cache shared by all the acceleration cores in a chip; (3) a custom memory controller; and (4) a prefetcher.
-(Task-4) (1) on-chip network interfaces between accelerator cores and eDRAM-based shared cache; and (2) off-chip network interfaces amongst the host system and other accelerator chips in software, respectively.
+(Task-3) (1) Matrix memory layout and metadata generation (2) memory layout hints and API (3) a custom memory controller; and (4) a prefetcher.
+(Task-4) (1) on-chip network interfaces between corelets and eDRAM cache; and (2) off-chip network interfaces amongst the host system and other accelerator chips in software, respectively.
 These tasks are completed, when the software code from the tasks can successfuly run test code derived from given benchmarks; provide performance in terms of cycles; and deliver the following items:
 (1) the completed performance modeling software code with the test code; and (2) technical documents depicting microarchitecture diagrams and performance simulator implementation with the simulator usage.
 
@@ -39,9 +91,9 @@ These tasks are completed when HSPICE can successfully simulate the netlists fro
 
 
 \noindent
-\textbf{(Task-7) Model the accelerator module.}
-Hwu, Kim, and Annavaram will integrating the models from Tasks 1 -- 4 to model the entire proposed accelerator module and and its performance in software. 
-This task is completed when we the performance simulator can successfuly run test code derived from given benchmarks with the input set fitting into the 4$\times$ 8GB DiRAM4 dies; provide performance in terms of simulated cycles; and deliver the following items:
+\textbf{(Task-7) Microarchitecture Simulator of GAMA system scaled to 16 GAMA tiles.}
+Hwu, Kim, and Annavaram will integrating the models from Tasks 1 -- 4 to model the entire GAMA tile and its performance in software. We will then integrate 16 tiles to create the GAMA system simulator. 
+This task is completed when we the performance simulator can successfuly run test code derived from given benchmarks with the input set fitting into the 4$\times$ 8GB DiRAM4 dies; provide performance in terms of simulated cycles. 16 tiles will be simulated as a GAMA system. We will deliver the following items:
 (1) the completed performance simulator software code with the test code; and (2) technical documents depicting architecture diagrams and performance simulator implementation with the simulator usage.
 
 
@@ -57,16 +109,16 @@ This task is completed when we the performance simulator can successfuly run tes
 % (X) GDS2 file in preparation for fabrication
 
 \noindent
-\textbf{Implement (Task-8) processing pipeline; (Task-9) memory sub-system; (Task-10) communication sub-system; and (Task-11) accelerator module.}
-Annavaram, Kim, and Hwu will perform the RTL designs of the processing pipeline, memory sub-system, and communication sub-system microarchitectures in Verilog HDL based on Tasks 1 -- 3, respectively; synthesize the RTL designs to generate gate-level netlists; and test the synthesized netlists using a gate-level simulator and a DNVUF2\_HPC\_PCIE FPGA development board.  
-Then they will integrate the RTL designs from Tasks 8 -- 10 to implement the entire proposed accelerator module. 
+\textbf{Implement (Task-8) GAMA corelet pipeline; (Task-9) GAMA tile memory system; (Task-10) GAMA tile communication sub-system; and (Task-11) GAMA tile integration.}
+ Annavaram, Kim and Hwu will perform the RTL designs of the processing pipeline, memory sub-system, and communication sub-system microarchitectures in Verilog HDL based on Tasks 2 -- 4, respectively; synthesize the RTL designs to generate gate-level netlists; and test the synthesized netlists using a gate-level simulator and a DNVUF2\_HPC\_PCIE FPGA development board.  
+Then they will integrate the RTL designs from Tasks 8 -- 10 to implement the entire proposed accelerator module in Task 11. 
 These four tasks are completed when the synthesized netlists can successfuly run the test code used for Tasks 1 -- 4 on a DNVUF2\_HPC\_PCIE FPGA development board, and deliver the following items:
 (1) the completed Verilog HDL code with synthesized gate-level netlists, synthesis scripts, and simulation scripts for each task; and 
 (2) technical document describing the RTL design and expected operating frequency of the accelerator module in the target 28nm technology.
 
 
 \noindent
-\textbf{(Task-12) Refine the accelerator module.} 
+\textbf{(Task-12) Iterative refinement of GAMA tile design.} 
 Hwu, Kim, and Annavaram will refine the architecture of the accelerator module, the microarchitectures of the accelerator and its sub-systems, and the RTL designs, after analyzing the performance of the accelerator module with the architectural simulator refined by the synthesis results.
 Then they will enhance the architectural simulator to simulate 16 accelerator modules.
 This task is completed when 
@@ -100,7 +152,7 @@ This task is completed when the schematic of the 2.5D connection is submitted to
 
 
 \noindent
-\textbf{(Task-17) Prototype a single accelerator module.}
+\textbf{(Task-17) FPGA Prototype of GAMA tile}
 Kim and Annavaram will prototype a single acclerator module using DNVUF2\_HPC\_PCIE boards that can be connected to a host system through the PCIe interface.
 This task is completed when the host system supplies the benchmark code and its input data, run the code with the input data on DNVUF2\_HPC\_PCIE FPGA development boards prototyping the accelerator module, and deliver the following items:
 (1) the completed Verilog HDL code and scripts used for prototyping the accelerator module,  
@@ -130,7 +182,7 @@ Kim with Seok and Hanumolu will work with Global Foundry (sub) for the 2.5D inte
 
 
 \noindent
-\textbf{(Task-20) Build and bring up the system.}
+\textbf{(Task-20) Build and bring up the GAMA system.}
 Annavaram with Kim, Seok, and Hanumolu will put together an accelerator system by assembling
 the fabricated accelerator modules, accelerator system PCB, and IBM P8 system.
 This task is completed when the full accelerator system runs the test code from Task-18, and deliver the full accelerator system.
