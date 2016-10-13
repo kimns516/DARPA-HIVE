@@ -1,21 +1,42 @@
 \noindent
-Graph processing is an important tool to enhance our understanding of an increasingly complex and interconnected social world. Inferring relationships between entities (or social actors), particularly going beyond the obvious edges between vertices one may see in a graph, is a computationally challenging task. This proposal focuses on executing graph algorithms as linear algebraic computations. This approach represents graphs as adjacency matrices, and many well known graph algorithms are transformed into matrix operations. The evolving duality between graph algorithms and their equivalent matrix operations forms a solid basis for designing computing systems that can efficiently manipulate matrix operations. 
+%Graph processing is an important tool to enhance our understanding of an increasingly complex and interconnected social world. 
+%Inferring relationships between entities (or social actors), particularly going beyond the obvious edges between vertices one may see in a graph, is a computationally challenging task. 
+This proposal focuses on executing graph algorithms as linear algebraic computations. 
+This approach represents graphs as adjacency matrices, and many well known graph algorithms are transformed into matrix operations. 
+The %evolving 
+duality between graph algorithms and their equivalent matrix operations forms a solid basis for designing computing systems that can efficiently manipulate matrix operations. 
 
-\textbf{Approach and Cross-layer Innovations:} 
-We propose to build an accelerator architecture, called GAMA (Graph Acceleration through Matrix Abstraction), to tackle critical challenges of graph processing. We will develop a graph processor architecture that can support a broad range of matrix manipulations through coarse grain reconfiguration of the execution pipeline. Given that graph algorithms place an enormous stress on memory subsystem, we will develop a new processing-in-memory tile, called the GAMA tile, where each graph processor is 2.5D stacked with 8GB of DiRAM4 from Tezzaron. We design elastic cache architecture that exploits the DiRAM4's unique properties of providing many more but narrow memory channels. Our elastic cache design supports both sparse and dense matrix accesses with relative ease. We will augment the DiRAM4 memory with additional metadata information which stores semantic information related to the matrix representation and expected access patterns to a given matrix.   
+\vspace{3pt}
+\noindent
+\textbf{Approach and Cross-layer Innovations.} 
+We propose to build an accelerator architecture, called GAMA (Graph Acceleration through Matrix Abstraction), to tackle critical challenges of graph processing. 
+We will develop a graph processor architecture that can support a broad range of matrix manipulations through coarse-grained reconfiguration of the execution pipeline. 
+Given that graph algorithms place an enormous stress on memory sub-system, we will develop a new processing-in-memory tile, called the GAMA tile, where each graph processor is 2.5D-stacked with 4$\times$ 8GB of DiRAM4 from Tezzaron. We design elastic cache architecture that exploits the DiRAM4's unique properties of providing many narrow memory channels. 
+Our elastic cache design efficiently supports both sparse/random and dense/sequential memory accesses for matrix operations. We will augment the DiRAM4 memory with additional metadata information which stores semantic information related to the matrix representation and expected access patterns to a given matrix.   
 
-We design a high performance interconnect architecture to enable inter-tile communication. We will use  charge-based and injection-locking techniques for designs high-speed links.  Using these high speed links we will interconnect 16 GAMA tiles in a GAMA system. We propose to build multiple enabling technologies to scale graph algorithms to 16 GAMA tiles. In particular, we will use hardware counters to measure load imbalances across GAMA tiles and provide an interface for software to decide on load migration strategies. We also propose to develop hardware hooks to monitor barrier synchronization stalls and allow the application developer to specify when it is acceptable for a GAMA tile to elide a barrier. 
+We design a high performance interconnect architecture to enable inter-tile communication. We will use  charge-based and injection-locking techniques for designs high-speed links.  Using these high-speed links we will interconnect 16 GAMA tiles in a GAMA system. We propose to build multiple enabling technologies to scale graph algorithms to 16 GAMA tiles. In particular, we will use hardware counters to measure load imbalances across GAMA tiles and provide an interface for software to decide on load migration strategies. We also propose to develop hardware hooks to monitor barrier synchronization stalls and allow the application developer to specify when it is acceptable for a GAMA tile to elide a barrier. 
 
-We will be collaborating with Tezzaron, eSilicon and IBM on this project. Tezzaron will provide the DiRAM4 designs and integration path for graph processor. eSilicon will do the 2.5D integration and chip fabrication. IBM will provide Power 8 CAPI interface specification for integrating the GAMA tiles with a P8 host processor. 
+We will work with Tezzaron, eSilicon, Nallatech, and IBM on this project. 
+Tezzaron will provide the DiRAM4 dies and support an integration path for graph processor including a memory controller soft IP that our team can enhance.
+eSilicon will provide the chip fabrication and 2.5D integration services.
+Nallatech will work with our team to design and fabricate a PCB that mounts 16 GAMA tiles and connects to a IBM P8 host system.
+IBM agreed to provide OpenCAPI interface specification and IPs for integrating the GAMA tiles with IBM P8 host processors. 
 
-\textbf{Success Metrics:} 
-We will use the following metrics for evaluations; note that these metrics are evaluated on simulators in Phase 1, FPGA on Phase 2 and on real chip by Phase 3.  We aim to achieve a reconfiguration penalty of no more than XX cycles in the graph processor, and energy consumption of XX nanoJoules per floating point multiply accumulate operation. For the memory system we aim for XX\% improvement in cache hit rate with elastic cache, achieve 95\% of peak bandwidth of DiRAM4 (4 TB/s), and average memory access latency of XX cycles, and less than 1\% memory overhead to store the metadata.
-
-For the inter-tile interconnect we expect to achieve per lane power efficiency in the order of 1mW/Gb/s and bandwidth of 1TB/s between two tiles. We will provide a remote memory access latency of XX cycles for cross-tile data transfer. Through active monitoring of load imbalance and workload migration we expect to achieve 90\% scaling efficiency as we scale from 1 to 16 tiles. When the programmer is able to use relaxed synchronization appropriately we expect to gain super-linear performance scaling without any loss in accuracy or increased  
+\vspace{3pt}
+\noindent
+\textbf{Success Metrics.} 
+We will use the following metrics for evaluations; note that these metrics are evaluated on simulators in Phase 1, FPGA on Phase 2 and on real chip by Phase 3.  
+We aim to achieve a reconfiguration penalty of no more than \textbf{XX} cycles in the graph processor, and energy consumption of \textbf{XX} nanoJoules per floating point multiply accumulate operation. 
+For the memory system we aim for \textbf{XX\%} improvement in cache hit rate with elastic cache, achieve 95\% of peak bandwidth of DiRAM4 (4 TBps), and average memory access latency of \textbf{XX} cycles, and less than \textbf{1\%} memory overhead to store the metadata.
+For the inter-tile interconnect we expect to achieve per lane power efficiency in the order of 1mW/Gb/s and bandwidth of 1TB/s between two tiles. We will provide a remote memory access latency of \textbf{XX} cycles for cross-tile data transfer. 
+Through active monitoring of load imbalance and workload migration we expect to achieve 90\% scaling efficiency as we scale from 1 to 16 tiles. 
+When the programmer is able to use relaxed synchronization appropriately we expect to gain super-linear performance scaling without any loss in accuracy or increased  
 
 %MURALI: DO WE NEED TO SAY ANYTHING ABOUT THE CHIP ITSELF IN TERMS OF TIMING, NOISE, GUARD BANDS ETC.,
 
-\textbf{Per Phase Cost:} 
-Phase 1 has a total cost of \$XX million. Phase 2 has a total cost of \$XX million and Phase 3 costs are \$XX million.
+\vspace{3pt}
+\noindent
+\textbf{Per Phase Cost.} 
+Phases 1, 2, and 3 cost XX, YY, and ZZ million dollars, respectively.
 
 %MURALI FILL ALL XXs. ALSO CHECK IF OUR PARTNERSHIP STUFF WITH COMPANIES IS CORRECT.
