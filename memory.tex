@@ -64,13 +64,16 @@ A list structure associated with the memory queue keeps track of valid entries i
 \noindent
 \textbf{Memory model.} 
 The GAMA system will adopt a distributed shared memory model with non-uniform memory access latency. 
-Hence, all the 16 GAMA tiles will share the address space. % and there will be no virtual memory support.  
+Hence, all the 16 GAMA tiles will share the address space. The programer uses OpenCAPI protocol to launch a sparse matrix operation on the GAMA accelerator. OpenCAPI provides  the libcxl library for initiating accelerator launch and memory management APIs, such as $cxl\_afu\_open\_dev$ to open the accelerator and $cxl\_afu\_attach$ to start the accelerator. The data for the accelerator is placed in a work element descriptor (WED) and is passed as a pointer to GAMA. The accelerator and P8 share the same virtual memory space. By default the data is interleaved across the tiles at the granularity of 128MB. This interleaving allows significant amount of contiguous matrix data to be placed per each tile, while at the same time allowing a large matrix to be mapped across multiple tiles to improve memory parallelism.   
+ 
+% and there will be no virtual memory support.  
 %M - do we need to say we don't support virtual memory? I think NUMA and virtual memory are orthogonal issues.
-As stated earlier, the host OpenPower system uses memory-mapped I/O to access the GAMA system. 
-Hence, the entire DiRAM4 will be mapped to higher order virtual address space of the host OpenPower system. 
+%The host OpenPower system uses memory-mapped I/O to access the GAMA system. 
+%Hence, the entire DiRAM4 will be mapped to higher order virtual address space of the host OpenPower system. 
 %M - earlier you stated that there will be no virtual memory support.
 %The programer uses a simple host-accelerator protocol to launch a sparse matrix operation on the GAMA system. 
-%NAM - need to revise and how to leverage CAPI.
+
+%%%%NAM - need to revise and how to leverage CAPI.
 
 
 \vspace{3pt}
@@ -83,25 +86,25 @@ Given the criticality of memory latency and bandwidth to graph processing, we wi
 For instance, the programmer may explicitly tag the column pointer, row index and value vectors (for compressed column representation). 
 This information will be used by the memory system to determine how to layout these arrays (bank interleaving and distribution across memory channels) in memory and also to generate bank and channel access commands for each vector appropriately. 
 % intermediate matrices and vectors that may be generated  may also be tagged by the programmer to indicate how they are being stored (doubly compressed column or row etc.,).  %For instance, in centrality analysis using all pairs shortest paths approach the shortest paths for each pair are stored as intermediate results that will be used in the final reduction process to extract the central vertex.  Each matrix or vector's  physical address to appropriate bank and channel activation sequence.
-Appropriate interleaving of data across a large number of channels is critical for enabling parallel access. 
-If requests from multiple MIMD corelets can be routed to different channels then their requests can be satisfied in parallel. 
+%Appropriate interleaving of data across a large number of channels is critical for enabling parallel access. 
+%If requests from multiple GAMA corelets can be routed to different channels then their requests can be satisfied in parallel. 
 Depending on the sparse matrix representation some data structures may see sequential accesses to large blocks while other structures may encounter mostly random accesses. For instance, in a compressed column  representation the column pointer vector is randomly accessed to select a given column (for instance, in a BFS the starting vertex column) and then the value in column pointer is used as index into row index  vector and value vector. The row index and value vectors are scanned together to reconstruct the column. Hence it is best to put the row index vector and value vector on different channels which can be concurrently accessed to accelerate the column reconstruction.  
 
 For dense matrices we expect the programmer to use the software API to provide hints to the hardware whether a matrix is predominantly accessed column-wise or row-wise in the next computation phase. 
-These hints can be updated at various computation phases in a kernel. 
-The hardware uses this information to decide on an appropriate matrix layout in memory. 
+These hints can be updated at various computation phases in a kernel. The hardware uses this information to decide on an appropriate matrix layout in memory. 
 
 %MURALI:SHOULD WE INCLUDE THIS LEVEL OF DETAILS?
 \vspace{3pt}
 \noindent
 \textbf{Memory datamap.} 
-Once the data (either sparse or dense matrix) is laid out in GAMA memory, a metadata table (or datamap) will be generated to indicate the range of vector indices stored at each tile.  
-The metadata may also store finer-granularity information such as the channel and bank information for each vector. 
+Once the data (either sparse or dense matrix) is laid out in each GAMA tile's memory, a metadata table (or datamap) will be generated to indicate the row and columns ranges stored at each tile for a given matrix.   
+The datamap also stores the  approximate number of non-zero elements in each row and column of a matrix in a distributed manner across multiple tiles. As described later, the sparsity information is used to improve load balancing.     
+The metadata may also store finer-granularity information such as the channel and bank interleaving information for rows and columns. 
 This metadata information will be used to enable simple optimizations such as gating bank activations when a given DiRAM4 bank is not needed in a computation.    
 % During the initial data layout phase each sparse matrix that is laid out in memory will store metadata in the banks to indicate the min and max index values of the various row and column indices that are stored in a given memory bank. This information can be used to determine which banks to activate. For instance if a column X-Y is all zeros in a given row then there is no need to accesss the column vector values of rows X-Y. If X-Y fit in a bank we can disable the bank. 
-During a matrix-vector or matrix-matrix multiplication, the corelets first construct the row that is currently used in multiplication and then use only the non-zero row indices to fetch the corresponding column vector elements. 
+During a matrix-vector or matrix-matrix (AXB) multiplication, the corelets first construct the row that is currently used in A and then use only the non-zero row indices to fetch the corresponding column elements from B. 
 For instance, if column X of a give row is zero then there is no need to fetch the row X value from the column. 
-To enable such optimizations the corelet must first construct the non-zero column indices and then use that index vector to disable or enable fetches. 
+To enable such optimizations the corelet must first construct the non-zero column indices and then use that index vector to disable or enable memory accesses. 
 
 %MURALI: DO WE PROVIDE A PROGRAMMING INTERFACE? OR HOW IS THE MEMORY LAID OUT OTHERWISE? 
 
@@ -117,11 +120,14 @@ To enable such optimizations the corelet must first construct the non-zero colum
 \noindent
 \textbf{L1 cache.}
 We propose elastic cache architecture to efficiently support both narrow- and wide-width memory accesses from multiple non-contiguous memory locations to co-reside in a single 64-byte cache line. 
-We introduce a concept of chunk tags to store tags for narrow-width data blocks (e.g., 4-, 8-, or 16-byte byte blocks) along with a conventional tag (dubbed commong tag) for each cache line (Figure~\ref{fig:elastic-cache}). 
-This adds only a small storage overhead, but allow us to efficiently use 64-byte cache lines for storing narrow-width data blocks from non-contiguous addresses, as well as a 64-byte block whose bytes are from consecutive addresses.
+Specifically, we introduce a concept of chunk tags to store tags for narrow-width data blocks (e.g., 4-, 8-, or 16-byte byte blocks) along with a conventional tag (referred to as common tag) for each cache line (see Figure~\ref{fig:elastic-cache}). 
+Chunk tags add only a small storage overhead. Elastic cache allows us to efficiently use 64-byte cache lines for storing narrow-width data blocks from non-contiguous addresses, that may be seen in sparse matrices, as well as a 64-byte contiguous  blocks that may be seen in dense matrices without significant cache reorganization. 
 Note that just adopting narrow cache lines is not efficient to handle sequential memory requests for dense datasets according to our experiments.
 Our preliminary study shows this architecture applied to L1 caches of a traditional GPU architecture improve the performance by more than 2$\times$ for SPMV.
 We expect that the performance can much further improved when the architecture is also applied to large L2 cache.
+
+
+%Note that just adopting narrow cache lines is not efficient to handle sequential memory requests for dense datasets according to our experiments.
 %Figure~\ref{fig:elastic-cache-flow} describes the access flow of the proposed \texttt{Elastic-Cache}. 
 %Note that we will employ the proposed \texttt{Elastic-Cache} architecture for both private SRAM-based L1 and shared eDRAM-based L2 caches.
 
@@ -141,9 +147,7 @@ We expect that the performance can much further improved when the architecture i
 \end{wrapfigure}
 \end{comment}
 
-
-Considering our corelet architecture with a 16-lane SIMD engine in a corelet (cf. Section~\ref{sec:processing}), 
-we will architect to architect the elastic L1 cache with 16 banks, each of which is 4KB and provides 4 bytes per cycle. 
+Considering our corelet architecture with a 16-lane SIMD engine (cf. Section~\ref{sec:processing}), we will architect to architect the elastic L1 cache with 16 banks, each of which is 4KB and provides 4 bytes per cycle. 
 This architecture is preferrable, as the 16-lane SIMD engine can simultaneously request 16 memory accesses to different addresses.
 The connection between an elastic L1 cache and a corelet is described in Section~\ref{sec:processing}.
 
@@ -152,36 +156,32 @@ The connection between an elastic L1 cache and a corelet is described in Section
 \textbf{L2 cache.}
 % 10/12 MS edited three paragraphs below. 
 %We will implement the L1 and L2 caches using SRAM and eDRAM bitcells. 
-In implementing eDRAM-based L2 cache, we aim to %minimize latency %and support \texttt{Elastic-Cache} data access. 
+The L2 cache is shared amongst 32 GAMA corelets and is implemented using eDRAM. In implementing eDRAM-based L2 cache, we aim to %minimize latency %and support \texttt{Elastic-Cache} data access. 
 %In the eDRAM based L2, it is particularly critical to 
 overcome relatively long latency of accessing eDRAM cache compared with SRAM cache. 
-In this project, %building upon our recent work on low-energy and compact memory-based FFT core\footnote{ISSCC'17 submitted}, 
-we will apply a dynamic fine-grained spatial-temporal voltage boosting technique only on the peripheral circuits (address decoders, multiplexers/demultiplexers, and interconnect buffers), not bitcells. 
+%In this project, %building upon our recent work on low-energy and compact memory-based FFT core\footnote{ISSCC'17 submitted}, 
+We will apply a dynamic fine-grained spatial-temporal voltage boosting technique only on the peripheral circuits (address decoders, multiplexers/demultiplexers, and interconnect buffers), but not bitcells. 
 This boosting technique is synergistic with the elastic cache architecture and beneficial for graph algorithms that often need to access a small subset of a large cache line without dissipating excessive power. 
-Especially, we will explore voltage boosting all the way to the thermal/reliability-limited level in a temporarily and spatially fine-grained fashion for improving access latency and throughput. 
-We will also effectively gate or use low supply voltage (e.g., 0.6V or lower) of the circuits that are not involved in accessing the interested data, making them serving as thermal buffers. 
-This way, we expect to significantly improve latency still under the thermal limit. 
+We will explore voltage boosting up to the thermal/reliability-limited level in a temporarily and spatially fine-grained fashion for improving access latency and throughput. 
+We will also effectively gate or use low supply voltage (e.g., 0.6V or lower) for the circuits that are not involved in accessing the demand data, making them serve as thermal buffers. 
+%This way, we expect to significantly improve latency still under the thermal limit. 
 Assuming 0.5V threshold voltage ($V_T$)\footnote{High $V_T$ is common in embedded memory for suppressing leakage}, boosting from 0.8V to 1.4V can increase the overdrive level ($V_{DD}$-$V_T$) from 0.3V to 0.9V, improving latency and throughput by at least 3X. 
 The low $V_{DD}$ used in the rest of cache circuits can save a significant amount of leakage energy dissipation. 
 By exploiting this latency improvement, we will explore to make the cache systems to perform multiple fine-grained data accesses (in serial by default but in parallel if data are in the multiple banks) and pack and send them back to the pipeline of a corelet. 
-To enable such voltage boosting, we need to meet two requirements. 
 
 
-First, we need to boost voltage in a fraction of cycle time. 
+To enable such voltage boosting, we need to meet two requirements.  First, we need to boost voltage in a fraction of cycle time. 
 This can be achieved first by having strong power-grid for boosted voltage, together with a good amount of decoupling capacitors circuits. 
 Still, the power grid, due to the sub-nanosecond transient change, can undergo a non-negligible amount of voltage integrity degradation (i.e., droops, overshoot, and ripples). 
-Over-designing power grids and decoupling capacitors can incur significant area and energy overhead. 
-Our approach to this challenge is to apply techniques that tolerate such problems in power grids
-ally in-situ error detection and correction (EDAC), as EDAC can detect and correct timing errors from supply voltage droop without over-design and the worst-case margin. 
-Specifically, we will develop an EDAC technique that does not require any correction based on replaying instructions based on our recent investigation.
-
+%Over-designing power grids and decoupling capacitors can incur significant area and energy overhead. 
+Our approach to this challenge is to apply techniques that tolerate such problems in power grids through in-situ error detection and correction (EDAC), as EDAC can detect and correct timing errors from supply voltage droop without over-design and the worst-case margin. Specifically, we will develop an EDAC technique that primarily focuses on detecting errors and allowing instruction replays to deal with error correction.
 
 Second, we need small and precise thermal monitoring systems to stop voltage overdrive if temperature rises above a temperature limit. 
-Note that existing state-of-the-arts in on-chip thermal monitoring, however, have been limited due to sensor circuits that are too invasive in terms of size ($>$ a few thousand $\mu m^2$ per sensor) and voltage-scalability (requiring $>$ 1V). 
+Note that existing state-of-the-art in on-chip thermal monitoring, however, have been limited due to sensor circuits that are too invasive in terms of size ($>$ a few thousand $\mu m^2$ per sensor) and voltage-scalability (requiring $>$ 1V). 
 This limitation prevents sensors from being placed closely to digital hotspots. 
-In this project, therefore we will create better thermal monitoring systems for embedded memory based on our recent thermal sensor designs. 
-By placing such sensors closely to estimated hotspots, we anticipate to achieve high accuracy in thermal monitoring, which will allow us to use voltage boosting longer and more frequently without pessimistic throttling. 
-Furthermore in eDRAM caches, this will help a refreshing scheme to adaptively change refreshing periods, saving energy and increasing access availability. 
+In this project, we will create improved thermal monitoring systems for embedded memory based on our recent thermal sensor designs~\cite{ISSCC14, JSSC15, CICC15 CITE PAPERS HERE OR SAY SOMETHING ABOUT THE TECHNIQUE}. 
+%By placing such sensors closely to estimated hotspots, we anticipate to achieve high accuracy in thermal monitoring, which will allow us to use voltage boosting longer and more frequently without pessimistic throttling. 
+Furthermore in eDRAM caches, accurate thermal sensing will be used to adaptively change the refresh cycles, saving energy and increasing access availability. 
 
 
 \begin{comment}
@@ -257,4 +257,3 @@ Note that the traditional memory queues cannot be large because they rely on CAM
 Instead of CAM-based memory queue, we aim to architect the large memory queue using a structure like set-associative cache, where entries are indexed by memory request addresses and confirms the full matching after comparing the tags associated with the index.
 A list structure associated with the memory queue keeps track of valid entries in the cache-like structure based on a scheduling policy and sends the entries to the back-end memory queues associated with each DRAM bank.
 \end{comment}
-
