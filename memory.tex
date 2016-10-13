@@ -121,8 +121,9 @@ Note that just adopting narrow cache lines is not efficient to handle sequential
 \end{comment}
 
 
-Considering our corelet architecture with a 16-lane SIMD engine (cf. Section~\ref{sec:processing}), we will architect to architect the elastic L1 cache with 16 banks, each of which provides 4 bytes per cycle. 
-This architecture is preferrable, as 16 lanes can simultaneously request 16 memory accesses to different addresses.
+Considering our corelet architecture with a 16-lane SIMD engine in a corelet (cf. Section~\ref{sec:processing}), 
+we will architect to architect the elastic L1 cache with 16 banks, each of which is 4KB and provides 4 bytes per cycle. 
+This architecture is preferrable, as the 16-lane SIMD engine can simultaneously request 16 memory accesses to different addresses.
 The connection between an elastic L1 cache and a corelet is described in Section~\ref{sec:processing}.
 
 \vspace{3pt}
@@ -219,7 +220,6 @@ In this project, therefore we will create better thermal monitoring systems for 
 We will build upon our recent sensor circuits (ISSCCâ€™14, JSSCâ€™15, CICCâ€™15) that are very compact (30Âµm2/sensor) and voltage-scalable to share digital supply voltages. 
 By placing such sensors closely to estimated hotspots, we can achieve high accuracy in thermal monitoring, which will allow us to use voltage boosting longer and more frequently without pessimistic throttling. 
 Furthermore this will help a refreshing scheme to adaptively change refreshing periods, saving energy and increasing access availability in eDRAM. 
-\end{comment}
 
 
 \noindent
@@ -235,3 +235,5 @@ The front-end memory queue aim to coalesce as many random/irregular memory reque
 Note that the traditional memory queues cannot be large because they rely on CAM.
 Instead of CAM-based memory queue, we aim to architect the large memory queue using a structure like set-associative cache, where entries are indexed by memory request addresses and confirms the full matching after comparing the tags associated with the index.
 A list structure associated with the memory queue keeps track of valid entries in the cache-like structure based on a scheduling policy and sends the entries to the back-end memory queues associated with each DRAM bank.
+\end{comment}
+
