@@ -17,7 +17,12 @@
 %%% of whether the dataset is sparse or dense.
 
 \noindent
-The GAMA memory system consists of a private L1 cache for each corelet, a shared spatially-temporally boosted eDRAM cache across all corelets within a GAMA tile, and 32GB of DiRAM4.    
+Our preliminary study exhibits that the memory bandwidth utilization is very low for many graph algorithms.
+This is because these algorithms often require random/sparse memory accesses, whereas the memory hierarchy is optimized only for sequential/dense memory accesses.
+The study also shows that we must re-design the entire memory hierarchy if we are going to effectively support both random/sparse and sequential/dense memory accesses.
+That is, optimizing either on-chip caches or off-chip memory alone is ineffective.
+Thus, we propose to architect the GAMA memory system, consisting of (1) a private L1 cache for each corelet, (2) a shared spatially-temporally boosted eDRAM cache across all corelets within a GAMA tile, and (3) 32GB of DiRAM4, to efficiently support random/sparse and sequential/dense memory accesses.
+More specifically, it will be built on circuit/architecture techniques and a soon-to-be-released DRAM technology and achieve the target 90\% utilization of memory bandwidth. 
 
 \noindent
 \subsubsection{Off-Chip Memory Architecture.} 
@@ -26,13 +31,38 @@ The GAMA memory system consists of a private L1 cache for each corelet, a shared
 \textbf{Memory technology.} 
 We will use  Tezzaron's DiRAM4 for the main memory of each GAMA tile.  
 Each DiRAM4 die provides 8GB capacity with 64$\times$32-bit ports (total 2048 I/O pins) with 1TB/s bandwidth. 
-HBM2 is expected to provide the same bandwidth as DiRAM, but we choose DiRAM because it provides narrower but more memory channels than HBM2 (16$\times$128-bit channels). 
+HBM2 is expected to provide the same bandwidth as DiRAM4, but we choose DiRAM4 because it provides narrower but more memory channels than HBM2 (16$\times$128-bit channels). 
 We believe that DiRAM is more advantageous than HBM2 for graph algorithms that generate random/sparse memory accesses. 
 Each tile integrates 4$\times$8GB DiRAM modules and thus there is a total of 4TBps internal memory bandwidth between the GAMA core and the main memory within each tile. 
 
+
 \vspace{3pt}
 \noindent
-\textbf{Memory model and data placement.} 
+\textbf{Memory controller.} 
+We propose a memory controller architecture supporting dynamic memory channel reconfigurations to effectively support both random/sparse and sequential/dense accesses.
+By default the GAMA main memory system starts with many narrow memory channels to efficiently service random/sparse memory accesses.
+However, it can be dynamically chained a subset of 64 physical memory channels to form wider logical memory channels to efficiently service sequential/dense memory accesses, depending on current memory access patterns. 
+For sequential/dense accesses, multiple small memory requests can be merged (coalesced) into one single memory request, allowing more efficient utilization of the memory scheduling queue.
+Meanwhile, when narrow memory channels are fused into a wide (logical) memory channel, we have more memory scheduling queue entries in a memory controller.
+These two aspects improve the utilization of both command/address and data buses for sequential/dense memory accesses.
+
+
+To dynamically configure the memory channels, we exploit the information from the provided datamap that is stored for each matrix and large front-end memory queues. 
+The datamap enables the memory controller to infer how consecutive elements of a row or column (irrespective of whether the matrix is dense or sparse) are laid out. 
+The front-end memory queue buffers requests from corelets across the entire GAMA system, as all GAMA tiles see a globally shared address space (see \textbf{``Memory model''}). 
+The memory queue monitors requests from multiple corelets and identifies all the requests that are bound to a given bank or channel. 
+It will then pull all the data from a single channel that may satisfy multiple corelet requests.  
+
+To enable efficient coalescing the memory queue may delay memory requests for a short interval that does not affect the utilization of processing pipeline and memory channel. 
+As each GAMA tile computes over a small slice of compressed vectors (or a slice of a row or column in a dense matrix) we expect that memory requests from different corelets within each tile may exhibit spatial locality. 
+Even sparse matrix representations will exhibit strong spatial locality across row or column values that are used in a given matrix operation.  Thus the front-end memory queue buffers requests and extracts spatial locality by coalescing memory requests to  
+Note that the traditional memory queues cannot be large because they rely on CAM.
+Instead of CAM-based memory queue, we aim to architect the large memory queue using a structure like set-associative cache, where entries are indexed by memory request address ranges to confirm the full matching after comparing the tags associated with the index.
+A list structure associated with the memory queue keeps track of valid entries in the cache-like structure based on a scheduling policy and sends the entries to the back-end memory queues associated with each DRAM bank.
+
+\vspace{3pt}
+\noindent
+\textbf{Memory model.} 
 The GAMA system will adopt a distributed shared memory model with non-uniform memory access latency. 
 Hence, all the 16 GAMA tiles will share the address space. % and there will be no virtual memory support.  
 %M - do we need to say we don't support virtual memory? I think NUMA and virtual memory are orthogonal issues.
@@ -40,10 +70,14 @@ As stated earlier, the host OpenPower system uses memory-mapped I/O to access th
 Hence, the entire DiRAM4 will be mapped to higher order virtual address space of the host OpenPower system. 
 %M - earlier you stated that there will be no virtual memory support.
 %The programer uses a simple host-accelerator protocol to launch a sparse matrix operation on the GAMA system. 
+%NAM - need to revise and how to leverage CAPI.
+
+
+\vspace{3pt}
+\noindent
+\textbf{Data placement.} 
 By default the data is interleaved across all tiles at the granularity of 128MB. 
 %M - why 128MB?
-
-
 Each 128MB data slice may be further interleaved in various banks and channels within each tile.  
 Given the criticality of memory latency and bandwidth to graph processing, we will provide several higher-level software APIs to allow the application developer or compilers (T2 thrust) to provide semantic information about matrix representations laid out in memory. 
 For instance, the programmer may explicitly tag the column pointer, row index and value vectors (for compressed column representation). 
@@ -71,21 +105,6 @@ To enable such optimizations the corelet must first construct the non-zero colum
 
 %MURALI: DO WE PROVIDE A PROGRAMMING INTERFACE? OR HOW IS THE MEMORY LAID OUT OTHERWISE? 
 
-\vspace{3pt}
-\noindent
-\textbf{Memory controller.} 
-We propose a memory controller architecture supporting dynamic memory channel reconfigurations.
-Tha is, we can dynamically chain a subset of 64 physical memory channels to form narrower or wider logical memory channels to efficiently service both random/sparse and sequential/dense memory accesses from the corelets, depending on current memory access patterns. 
-To dynamically configure the memory channels, we exploit the information from the provided datamap that is stored for each matrix and large front-end memory queues. 
-The datamap enables the memory controller to infer how consecutive elements of a row or column (irrespective of whether the matrix is dense or sparse) are laid out. 
-The front-end memory queue buffers requests from corelets across the entire GAMA system; recall that all GAMA tiles see a globally shared address space. 
-The memory queue monitors requests from multiple corelets and identifies all the requests that are bound to a given bank or channel. 
-It will then pull all the data from a single channel that may satisfy multiple corelet requests.  
-To enable efficient coalescing the memory queue may delay memory requests for a short interval that does not affect the utilization of processing pipeline and memory channel. 
-%As each GAMA tile computes over a small slice of compressed vectors (or a slice of a row or column in  a dense matrix) we expect that memory requests from different corelets within each tile may exhibit spatial locality. Even sparse matrix representations will exhibit strong spatial locality across row or column values that are used in a given matrix operation.  Thus the front-end memory queue buffers requests and extracts spatial locality by coalescing memory requests to  
-Note that the traditional memory queues cannot be large because they rely on CAM.
-Instead of CAM-based memory queue, we aim to architect the large memory queue using a structure like set-associative cache, where entries are indexed by memory request address ranges to confirm the full matching after comparing the tags associated with the index.
-A list structure associated with the memory queue keeps track of valid entries in the cache-like structure based on a scheduling policy and sends the entries to the back-end memory queues associated with each DRAM bank.
 
 
 %Graph algorithms are typically very memory-intensive while the memory access patterns are very random (i.e., poor sptial and temporal locality).  These characteristics greatly reduce the efficiency of traditional memory systems that are typically optimized for serving sequential memory requests.  For example, running BFS on a GPU, we observe that the memory system becomes the performance bottleneck even when HBM provides 512GB/s.  In this project, we aim to implement a memory system that can support both random and sequential memory accesses for sparse and dense datasets.
@@ -101,6 +120,8 @@ We propose elastic cache architecture to efficiently support both narrow- and wi
 We introduce a concept of chunk tags to store tags for narrow-width data blocks (e.g., 4-, 8-, or 16-byte byte blocks) along with a conventional tag (dubbed commong tag) for each cache line (Figure~\ref{fig:elastic-cache}). 
 This adds only a small storage overhead, but allow us to efficiently use 64-byte cache lines for storing narrow-width data blocks from non-contiguous addresses, as well as a 64-byte block whose bytes are from consecutive addresses.
 Note that just adopting narrow cache lines is not efficient to handle sequential memory requests for dense datasets according to our experiments.
+Our preliminary study shows this architecture applied to L1 caches of a traditional GPU architecture improve the performance by more than 2$\times$ for SPMV.
+We expect that the performance can much further improved when the architecture is also applied to large L2 cache.
 %Figure~\ref{fig:elastic-cache-flow} describes the access flow of the proposed \texttt{Elastic-Cache}. 
 %Note that we will employ the proposed \texttt{Elastic-Cache} architecture for both private SRAM-based L1 and shared eDRAM-based L2 caches.
 
@@ -224,7 +245,7 @@ Furthermore this will help a refreshing scheme to adaptively change refreshing p
 
 \noindent
 \textbf{Off-chip Memory Architecture:} 
-We aim to build our memory sub-system on Tezzaronâ€™s DiRAM4 3D Memory for the main memory of our accelerator. 
+We aim to build our memory sub-system on Tezzaron's DiRAM4 3D Memory for the main memory of our accelerator. 
 One 8GB DiRAM die provides 64 32-bit ports (total 2048 I/O pins) with 1TB/s bandwidth. 
 HBM2 is expected to provide the same bandwidth as DiRAM, but we choose DiRAM because DiRAM provides narrower but more memory channels (64Ã—32-bit channels) than HBM2 (16Ã—128-bit channels). 
 That is DiRAM is more advantageous than HBM2 for graph algorithms that generate random/irregular memory accesses. 
