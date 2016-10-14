@@ -169,6 +169,12 @@ Assuming 0.5V threshold voltage ($V_T$)\footnote{High $V_T$ is common in embedde
 The low $V_{DD}$ used in the rest of cache circuits can save a significant amount of leakage energy dissipation. 
 By exploiting this latency improvement, we will explore to make the cache systems to perform multiple fine-grained data accesses (in serial by default but in parallel if data are in the multiple banks) and pack and send them back to the pipeline of a corelet. 
 
+\begin{wrapfigure}{r}[0pt]{0.35\textwidth}
+\center
+\includegraphics[width=2.4in, trim=20 20 10 50]{./fig/boosting.pdf}
+\caption{A boosting scheme for the L2 cache using 3T eDRAM bitcells. Red dashed outlines highlight the portions receiving boosting/underdriving. It is critical to protect dynamic nodes from coupling noises of boosting via parasitic capacitors (gray).}
+\label{fig:boosting}
+\end{wrapfigure}
 
 To enable such voltage boosting, we need to meet two requirements.  First, we need to boost voltage in a fraction of cycle time. 
 This can be achieved first by having strong power-grid for boosted voltage, together with a good amount of decoupling capacitors circuits. 
@@ -179,10 +185,9 @@ Our approach to this challenge is to apply techniques that tolerate such problem
 Second, we need small and precise thermal monitoring systems to stop voltage overdrive if temperature rises above a temperature limit. 
 Note that existing state-of-the-art in on-chip thermal monitoring, however, have been limited due to sensor circuits that are too invasive in terms of size ($>$ a few thousand $\mu m^2$ per sensor) and voltage-scalability (requiring $>$ 1V). 
 This limitation prevents sensors from being placed closely to digital hotspots. 
-In this project, we will create improved thermal monitoring systems for embedded memory based on our recent thermal sensor designs~\cite{ISSCC14, JSSC15, CICC15 CITE PAPERS HERE OR SAY SOMETHING ABOUT THE TECHNIQUE}. 
+In this project, we will create improved thermal monitoring systems for embedded memory based on our recent thermal sensor designs that achieves about two orders of magnitude more compact (30 $\mu m^2$ per sensor), comparably or more accurate ($\pm 1.1^oC 3-\sigma$ error), and voltage scalable down to 0.4V \cite{ISSCC14, JSSC15, CICC15}. 
 %By placing such sensors closely to estimated hotspots, we anticipate to achieve high accuracy in thermal monitoring, which will allow us to use voltage boosting longer and more frequently without pessimistic throttling. 
 Furthermore in eDRAM caches, accurate thermal sensing will be used to adaptively change the refresh cycles, saving energy and increasing access availability. 
-
 
 \begin{comment}
 To enable such voltage boosting, we need to meet two requirements. 
