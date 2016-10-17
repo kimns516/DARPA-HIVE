@@ -1,14 +1,16 @@
 \noindent
-The memory sub-system of state-of-the-art GPUs and as such (e.g., Intel Knights Landing) based on HBM and HMC is optimized for applications with sequential/dense memory accesses, wasting memory bandwidth.
+The memory sub-system of state-of-the-art GPUs and as such (e.g., Intel Knights Landing~\cite{knight:intel:2016}) 
+based on HBM~\cite{hbm} and HMC~\cite{hmc} is optimized for applications with sequential/dense memory accesses, wasting memory bandwidth.
 Thus, these processors cannot reap the benefit of high (sequential access) bandwidth and underutilize their processing cores for graph algorithms with random/sparse memory accesses.
 Some accelerators are proposed to efficiently process sparse matrix operations, but they are built on the conventional memory architecture, sufferring from the same issue as the GPUs and as such.
 In contrast, using the state-of-the-art, soon-to-be-released memory, we propose to jointly architect accelerator and memory sub-system architectures 
 such that the accelerator system can efficiently execute both dense and sparse matrix operations.
 
-Various spatio-temporal voltage boosting techniques have been applied to SRAM to reduce read/write failure of SRAM arrays at low voltage, while the failure mechanism of eDRAM arrays singificantly differs from that of SRAM arrays.
+Various spatio-temporal voltage boosting techniques have been applied to SRAM to reduce read/write failure of SRAM arrays at low voltage~\cite{}, 
+while the failure mechanism of eDRAM arrays singificantly differs from that of SRAM arrays.
 That is, such voltage boosting techniques have never been applied to eDRAM arrays especially to reduce the access latency.
 
-In improving link power efficiency, dynamic power management techniques (e.g., Anand et al., JSSC 2015) cannot be used to improve power efficiency, because the GAMA tiles are going to be designed to minimize processor idle time. 
+In improving link power efficiency, dynamic power management techniques (e.g., \cite{anand:jssc:2015} cannot be used to improve power efficiency, because the GAMA tiles are going to be designed to minimize processor idle time. 
 Instead, the techniques that improve power efficiency at a peak data rate as Sec.~\ref{sec:scale:link} are needed.
 
 \begin{comment}
