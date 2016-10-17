@@ -53,11 +53,10 @@ We expect that the performance can much further improved when the architecture i
 
 
 Considering our core architecture with a 8-lane engine (cf. Sec.~\ref{sec:processing}), 
-we will architect the elastic L1 cache with 8 banks, each of which is 4KB and provides 4 bytes per cycle. 
-This architecture is preferrable, as the 8-lane SIMD engine with the address generation logic 
-in Fig.~\ref{fig:arch}(c) can simultaneously request 8 memory accesses to different addresses for the heap memory accesses.
+we will architect the elastic L1 cache with 8 banks. 
+Each bank is a 4KB direct-map cache with 4 victim entries and provides 8 bytes per cycle (i.e., total 64 bytes per cycle).
+This architecture is preferrable, as the 8-lane SIMD engine with the address generation logic in Fig.~\ref{fig:arch}(c) can simultaneously request 8 memory accesses to different addresses for the heap memory accesses.
 %The connection between an elastic L1 cache and a corelet is described in Section~\ref{sec:processing}.
-
 \begin{wrapfigure}{r}[0pt]{0.35\textwidth}
 \center
 \includegraphics[width=2.4in, trim=20 20 10 50]{./fig/boosting.pdf}
@@ -120,49 +119,52 @@ Each tile integrates 4$\times$8GB DiRAM modules and thus there is a total of 4TB
 \textbf{Memory controller.} 
 We propose a memory controller architecture supporting dynamic memory channel reconfigurations to effectively support both random/sparse and sequential/dense accesses.
 By default the GAMA main memory system starts with many narrow memory channels to efficiently service random/sparse memory accesses.
-However, it can be dynamically chained a subset of 64 physical memory channels to form wider logical memory channels to efficiently service sequential/dense memory accesses, depending on current memory access patterns. 
-For sequential/dense accesses, multiple small memory requests can be merged (coalesced) into one single memory request, allowing more efficient utilization of the memory scheduling queue.
-Meanwhile, when narrow memory channels are fused into a wide (logical) memory channel, we have more memory scheduling queue entries in a memory controller.
-These two aspects improve the utilization of both command/address and data buses for sequential/dense memory accesses.
+However, %after the current or expected memory access patterns is determined based on a data map (cf. ``Data placement and memory map''),
+64 memory channels can be dynamically chained to form wider logical memory channels, each with a larger memory queue for efficient sequential/dense memory accesses.
+That is, multiple small memory requests can be merged (coalesced) into one single memory request, allowing more efficient utilization of the memory scheduling queue.
+%When narrow memory channels are fused into a wide (logical) memory channel, 
+%we have more memory scheduling queue entries in a logical memory controller.
+%These two aspects improve the utilization of both command/address and data buses for sequential/dense memory accesses.
 
 
-To dynamically configure the memory channels, we exploit the information from the provided datamap that is stored for each matrix and large front-end memory queues. 
+To dynamically configure the memory channels, we exploit the information from the provided memory map stored for each matrix (cf. ``\textbf{Data placement and memory map}'').
+%and large front-end memory queues. 
 The datamap enables the memory controller to infer how consecutive elements of a row or column (irrespective of whether the matrix is dense or sparse) are laid out. 
-The front-end memory queue buffers requests from corelets across the entire GAMA system, as all GAMA tiles see a globally shared address space (see \textbf{``Memory model''}). 
-The memory queue monitors requests from multiple corelets and identifies all the requests that are bound to a given bank or channel. 
-It will then pull all the data from a single channel that may satisfy multiple corelet requests.  
+The front-end memory queue buffers the requests from cores across the entire GAMA system, as all GAMA tiles see a globally shared address space (cf. \textbf{``Memory model''}). 
+The memory queue monitors the requests from multiple cores and determines all the requests that are bound to a given bank or channel. 
+It will then pull all the data from a single channel that may satisfy multiple requests from a core.  
 
 
-To enable efficient coalescing the memory queue may delay memory requests for a short interval that does not affect the utilization of processing pipeline and memory channel. 
-As each GAMA tile computes over a small slice of compressed vectors (or a slice of a row or column in a dense matrix) we expect that memory requests from different corelets within each tile may exhibit spatial locality. 
-Even sparse matrix representations will exhibit strong spatial locality across row or column values that are used in a given matrix operation.  Thus the front-end memory queue buffers requests and extracts spatial locality by coalescing memory requests to  
-Note that the traditional memory queues cannot be large because they rely on CAM.
-Instead of CAM-based memory queue, we aim to architect the large memory queue using a structure like set-associative cache, where entries are indexed by memory request address ranges to confirm the full matching after comparing the tags associated with the index.
-A list structure associated with the memory queue keeps track of valid entries in the cache-like structure based on a scheduling policy and sends the entries to the back-end memory queues associated with each DRAM bank.
+To support a large memory queue for efficient coalescing, 
+we adopt a two-stage memory queue structure with a large number of entries in the front-end queue. 
+The memory controller with this proposed  memory queue may decide to delay requests for a short interval that does not affect the utilization of cores and memory channels. 
+%As each GAMA tile computes over a slice of compressed vectors (or a slice of a row or column in a dense matrix), 
+%we expect that memory requests from different cores within each tile may exhibit spatial locality. 
+%Even sparse matrix representations will exhibit strong spatial locality across row or column values that are used in a given matrix operation.  
+%Thus the front-end memory queue buffers requests and extracts spatial locality by coalescing memory requests. 
+This allows the front-end memory queue buffers requests and extracts more spatial locality by coalescing memory requests. 
+%Note that the traditional memory queues cannot be large because they rely on CAM.
+%Instead of CAM-based memory queue, we aim to architect the large memory queue using a structure like set-associative cache, where entries are indexed by memory request address ranges to confirm the full matching after comparing the tags associated with the index.
+%A list structure associated with the memory queue keeps track of valid entries in the cache-like structure based on a scheduling policy and sends the entries to the back-end memory queues associated with each DRAM bank.
 
 \vspace{3pt}
 \noindent
 \textbf{Memory model.} 
 The GAMA system will adopt a distributed shared memory model with non-uniform memory access latency. 
-Hence, all the 16 GAMA tiles will share the address space. The programer uses OpenCAPI protocol to launch a sparse matrix operation on the GAMA accelerator. OpenCAPI provides  the libcxl library for initiating accelerator launch and memory management APIs, such as $cxl\_afu\_open\_dev$ to open the accelerator and $cxl\_afu\_attach$ to start the accelerator. The data for the accelerator is placed in a work element descriptor (WED) and is passed as a pointer to GAMA. The accelerator and P8 share the same virtual memory space. By default the data is interleaved across the tiles at the granularity of 128MB. This interleaving allows significant amount of contiguous matrix data to be placed per each tile, while at the same time allowing a large matrix to be mapped across multiple tiles to improve memory parallelism.   
- 
-% and there will be no virtual memory support.  
-%M - do we need to say we don't support virtual memory? I think NUMA and virtual memory are orthogonal issues.
-%The host OpenPower system uses memory-mapped I/O to access the GAMA system. 
-%Hence, the entire DiRAM4 will be mapped to higher order virtual address space of the host OpenPower system. 
-%M - earlier you stated that there will be no virtual memory support.
-%The programer uses a simple host-accelerator protocol to launch a sparse matrix operation on the GAMA system. 
+Hence, all the 16 GAMA tiles will share the address space. 
+The programer uses the OpenCAPI protocol to launch a sparse matrix operation on the GAMA accelerator. 
+OpenCAPI removes the overhead and complexity of sharing the main memory and maintaining cache coherence amongst host CPUs and accelerators.
+Specifically, OpenCAPI provides the libcxl library for initiating accelerator launch and memory management APIs, such as $cxl\_afu\_open\_dev$ to open the accelerator and $cxl\_afu\_attach$ to start the accelerator. 
+The data for the accelerator is placed in a work element descriptor (WED) and is passed as a pointer to GAMA. 
+The accelerator and host can seamlessly share the same virtual memory space. 
 
-%%%%NAM - need to revise and how to leverage CAPI.
-
-
+\begin{comment}
 \vspace{3pt}
 \noindent
 \textbf{Data placement.} 
-By default the data is interleaved across all tiles at the granularity of 128MB. 
-%M - why 128MB?
-Each 128MB data slice may be further interleaved in various banks and channels within each tile.  
-Given the criticality of memory latency and bandwidth to graph processing, we will provide several higher-level software APIs to allow the application developer or compilers (T2 thrust) to provide semantic information about matrix representations laid out in memory. 
+%Each 128MB data slice may be further interleaved in various banks and channels within each tile.  
+Given the criticality of memory latency and bandwidth to graph processing, 
+we will provide several higher-level software APIs to allow the application developer or compilers (T2 thrust) to provide semantic information about matrix representations laid out in memory. 
 For instance, the programmer may explicitly tag the column pointer, row index and value vectors (for compressed column representation). 
 This information will be used by the memory system to determine how to layout these arrays (bank interleaving and distribution across memory channels) in memory and also to generate bank and channel access commands for each vector appropriately. 
 % intermediate matrices and vectors that may be generated  may also be tagged by the programmer to indicate how they are being stored (doubly compressed column or row etc.,).  %For instance, in centrality analysis using all pairs shortest paths approach the shortest paths for each pair are stored as intermediate results that will be used in the final reduction process to extract the central vertex.  Each matrix or vector's  physical address to appropriate bank and channel activation sequence.
@@ -174,17 +176,26 @@ For dense matrices we expect the programmer to use the software API to provide h
 These hints can be updated at various computation phases in a kernel. The hardware uses this information to decide on an appropriate matrix layout in memory. 
 
 %MURALI:SHOULD WE INCLUDE THIS LEVEL OF DETAILS?
+\end{comment}
+
 \vspace{3pt}
 \noindent
-\textbf{Memory datamap.} 
-Once the data (either sparse or dense matrix) is laid out in each GAMA tile's memory, a metadata table (or datamap) will be generated to indicate the row and columns ranges stored at each tile for a given matrix.   
-The datamap also stores the  approximate number of non-zero elements in each row and column of a matrix in a distributed manner across multiple tiles. As described later, the sparsity information is used to improve load balancing.     
+\textbf{Data placement and memory datamap.} 
+By default the data is interleaved across the tiles at the granularity of 128MB. 
+This interleaving allows significant amount of contiguous matrix data to be placed per each tile, while at the same time allowing a large matrix to be mapped across multiple tiles to improve memory parallelism.   
+Once the data (either sparse or dense matrix) is laid out in each GAMA tile's memory, 
+a metadata table (or datamap) will be generated to indicate the row and columns ranges stored at each tile for a given matrix.   
+
+The datamap also stores the  approximate number of NZVs in each row and column of a matrix in a distributed manner across multiple tiles. 
+As described later, the sparsity information is used to improve load balancing.     
 The metadata may also store finer-granularity information such as the channel and bank interleaving information for rows and columns. 
-This metadata information will be used to enable simple optimizations such as gating bank activations when a given DiRAM4 bank is not needed in a computation.    
+This metadata information will be used to enable simple optimizations such as gating bank activations 
+when a given DiRAM4 bank is not needed in a computation.    
 % During the initial data layout phase each sparse matrix that is laid out in memory will store metadata in the banks to indicate the min and max index values of the various row and column indices that are stored in a given memory bank. This information can be used to determine which banks to activate. For instance if a column X-Y is all zeros in a given row then there is no need to accesss the column vector values of rows X-Y. If X-Y fit in a bank we can disable the bank. 
-During a matrix-vector or matrix-matrix (AXB) multiplication, the corelets first construct the row that is currently used in A and then use only the non-zero row indices to fetch the corresponding column elements from B. 
-For instance, if column X of a give row is zero then there is no need to fetch the row X value from the column. 
-To enable such optimizations the corelet must first construct the non-zero column indices and then use that index vector to disable or enable memory accesses. 
+%
+%During a matrix-vector or matrix-matrix (AXB) multiplication, the cores first construct the row that is currently used in A and then use only the non-zero row indices to fetch the corresponding column elements from B. 
+%For instance, if column X of a give row is zero then there is no need to fetch the row X value from the column. 
+%To enable such optimizations the core must first construct the non-zero column indices and then use that index vector to disable or enable memory accesses. 
 
 %MURALI: DO WE PROVIDE A PROGRAMMING INTERFACE? OR HOW IS THE MEMORY LAID OUT OTHERWISE? 
 
