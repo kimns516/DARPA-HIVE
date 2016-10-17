@@ -30,17 +30,16 @@ In the presence of load imbalances such synchronizations curtail scaling.
 These observations lead to the main research thrusts of this proposal, as described below. 
 To guide the discussion of the proposed research, we present an overview of the system architecture that we will design and build. 
 The system will rely on processing-in-memory architecture, but appropriately adapted for sparse matrix manipulations for graph processing. 
-Figure~\ref{fig:arch}(a) presents the overview of the GAMA (graph acceleration through matrix abstraction) system consisting of 16 GAMA tiles and host systems connected by power-efficient inter-chip OpenCAPI links.
+Fig.~\ref{fig:arch}(a) presents the overview of the GAMA (graph acceleration through matrix abstraction) system consisting of 16 GAMA tiles and host systems connected by power-efficient inter-chip OpenCAPI links.
 A GAMA tile consists of a many-core accelerator, four 8GB high-bandwidth memory dies (DiRAM4) with 64$\times$64-bit memory channels, 
 and four OpenCAPI links with aggregate memory bandwidth of 1TBps to four other GAMA tiles or a host system.
-Subsequently, we will describe the detail of the accelerator (cf. Section~\ref{sec:processing}) and memory sub-system (cf. Section~\ref{sec:memory}) architectures with architecture and circuit support for efficient inter-time communications and thus strong scaling over 16 GAMA tiles (cf. Section~\ref{sec:scale}).
+Subsequently, we will describe the detail of the accelerator (cf. Sec.~\ref{sec:processing}) and memory sub-system (cf. Sec.~\ref{sec:memory}) architectures with architecture and circuit support for efficient inter-time communications and thus strong scaling over 16 GAMA tiles (cf. Sec.~\ref{sec:scale}).
 
 
 \begin{figure}
 \center
-%\vspace{-8ex}
 \includegraphics[width=1.0\linewidth]{fig/arch.png}
-\caption{GAMA System Architecture}
+\caption{GAMA (a) system architecture, (b) accelerator architecture (the left-top cluster), (c) core microarchitecture with a 8-lane sparse matrix acceleration engine.}
 \label{fig:arch}
 \end{figure}
 
