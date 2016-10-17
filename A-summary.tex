@@ -2,36 +2,41 @@
 %Graph processing is an important tool to enhance our understanding of an increasingly complex and interconnected social world. 
 %Inferring relationships between entities (or social actors), particularly going beyond the obvious edges between vertices one may see in a graph, is a computationally challenging task. 
 This proposal focuses on executing graph algorithms as linear algebraic computations. 
-This approach represents graphs as adjacency matrices, and many well known graph algorithms are transformed into matrix operations. 
-The %evolving 
-duality between graph algorithms and their equivalent matrix operations forms a solid basis for designing computing systems that can efficiently manipulate matrix operations. 
+This approach represents graphs as adjacency matrices, and many well known graph algorithms can be transformed into matrix operations. 
+The evolving 
+%duality between graph algorithms and their equivalent matrix operations forms a solid basis for designing computing systems that can efficiently manipulate matrix operations. 
+duality between graph algorithms and their equivalent matrix operations forms a solid basis 
+for designing an efficient graph analytic processor. 
 
 \vspace{3pt}
 \noindent
 \textbf{Approach and Cross-layer Innovations.} 
-We propose to build a GAMA (Graph Acceleration through Matrix Abstraction) system to tackle critical graph processing challenges. 
+In this project, we aim to deliver 1000$\times$ higher performance than the state-of-the-art GPU operating on sparse matrices.
+Toward the goal, we propose to build a GAMA (Graph Acceleration through Matrix Abstraction) system to tackle critical graph processing challenges. 
 %an accelerator architecture, called 
 Especially, given that graph algorithms place an enormous stress on the memory sub-system, 
-we will develop the GAMA tile, processing-in-memory architecture where an accelerator is 2.5D-stacked with 
-4$\times$
-%8GB 
-DiRAM4 dies.
+we will develop the GAMA tile, processing-in-memory architecture where an accelerator is 2.5D-stacked with 4$\times$8GB DiRAM4 dies.
 % from Tezzaron. 
 
-First, to efficiently support a broad range of matrix operations, we aim to develop a many-core graph acceleration architecture. 
-In this architecture, each low-power core is tightly coupled with 8-lane engines to accelerate sparse matrix operations and the memory sub-systems through network-on-chip.
-Second, exploiting the DiRAM4's unique properties, we aim to redesign the memory sub-system (the on-chip L1 and L2 caches and off-chip memory controller) with innovative circuit and architecture techniques. 
+The GAMA tile is architected to efficiently support %a broad range of 
+graph primitives through matrix operations.
+Specifically, we first aim to develop a many-core %graph 
+acceleration architecture, where
+%In this architecture, 
+each %low-power 
+core is tightly coupled with (1) an 8-lane engine to accelerate sparse matrix operations and (2) the memory sub-systems through network-on-chip.
+Second, exploiting the unique properties of DiRAM4, we aim to redesign the memory sub-system (on-chip caches and off-chip memory controller). %with innovative circuit and architecture techniques. 
 This memory sub-system will efficiently support both sparse/random and dense/sequential memory accesses for efficient matrix operations. 
-Lastly, we will design a high-speed link circuit with innovative charge-based and injection-locking techniques. 
-This link will 
+Lastly, we will design a high-speed link with state-of-the-art charge-based and injection-locking circuit techniques, which will allow us to provide the target 1TBps bandwidth for inter-tile communications under the tight chip power constraint.
+%This link will 
 %power-efficiently 
-be designed to provide the target 1TBps bandwidth for inter-tile communications under the tight chip power constraint.
+%be designed 
 
 
-To accomplish the target performance improvement of 1000$\times$ with more GAMA tiles, %we will further enhance the GAMA system. 
-we will first enhance the memory sub-system that allows a GAMA accelerator to leverage 
+%With GAMA tiles
+Further improving the GAMA system's performance,  %we will further enhance the GAMA system. 
 %additional metadata information 
-stored semantic information related to the matrix representation and expected access patterns to a given matrix.   
+we first propose to enhance the memory sub-system such that GAMA accelerators can leverage stored semantic information related to the matrix representation and expected access patterns of a given matrix for more efficient memory accesses.   
 Second, we will build multiple enabling technologies to scale graph algorithms to 16 GAMA tiles and beyond. 
 Especially, we will implement hardware counters and hooks that assist software to efficiently balance the load and relax synchronization.
 %to measure load imbalances across GAMA tiles and provide an interface for software to decide on load migration strategies. 
@@ -44,12 +49,13 @@ Especially, we will implement hardware counters and hooks that assist software t
 %Our elastic cache design 
 
 
-To implement the GAMA system with innovative circuit techniques and architectures, 
-we will work with Tezzaron, eSilicon, Nallatech, and IBM on this project. 
-Tezzaron will provide the DiRAM4 dies and support an integration path for graph processor including a memory controller soft IP that our team can enhance.
-eSilicon will work with our team to provide the chip fabrication and 2.5D integration services.
-Nallatech design a PCB that mounts 16 GAMA tiles and connects to a IBM P8 host system with our team, and fabricate it.
-IBM agreed to provide OpenCAPI interface specification and IPs for integrating the GAMA tiles with IBM P8 host processors. 
+To implement the GAMA system, % with innovative circuit and architecture techniques, 
+we will work with 
+four companies on this project. 
+Tezzaron will supply the DiRAM4 dies and support an integration path for graph processor including a memory controller soft IP that our team can enhance.
+eSilicon will provide the chip fabrication and 2.5D integration services.
+Nallatech will design a PCB that mounts 16 GAMA tiles and connects the tiles to the IBM OpenPower host system. % with our team, and fabricate it.
+IBM agreed to support OpenCAPI interface specification and IPs for integrating the GAMA tiles with IBM OpenPower host processors. 
 
 \vspace{3pt}
 \noindent
