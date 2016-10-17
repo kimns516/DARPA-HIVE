@@ -11,37 +11,16 @@ for designing an efficient graph analytic processor.
 \vspace{3pt}
 \noindent
 \textbf{Approach and Cross-layer Innovations.} 
-In this project, we aim to deliver 1000$\times$ higher performance than the state-of-the-art GPU operating on sparse matrices.
-Toward the goal, we propose to build a GAMA (Graph Acceleration through Matrix Abstraction) system to tackle critical graph processing challenges. 
-%an accelerator architecture, called 
-Especially, given that graph algorithms place an enormous stress on the memory sub-system, 
-we will develop the GAMA tile, processing-in-memory architecture where an accelerator is 2.5D-stacked with 4$\times$8GB DiRAM4 dies.
-% from Tezzaron. 
-
-The GAMA tile is architected to efficiently support %a broad range of 
-graph primitives through matrix operations.
-Specifically, we first aim to develop a many-core %graph 
-acceleration architecture, where
-%In this architecture, 
-each %low-power 
-core is tightly coupled with (1) an 8-lane engine to accelerate sparse matrix operations and (2) the memory sub-systems through network-on-chip.
-Second, exploiting the unique properties of DiRAM4, we aim to redesign the memory sub-system (on-chip caches and off-chip memory controller). %with innovative circuit and architecture techniques. 
+In this project, we aim to deliver 1000$\times$ higher system performance than the state-of-the-art GPU operating on sparse matrices.
+Toward the goal, we propose to build the GAMA (Graph Acceleration through Matrix Abstraction) system to tackle critical graph processing challenges. 
+The GAMA tile is a novel processing-in-memory architecture where a matrix computation accelerator is 2.5D-stacked with 4$\times$8GB DiRAM4 dies.
+The accelerator is composed multiple GAMA corelets, where each corelet is configured as an 8-lane SIMD engine customized for matrix operations. Each corelet 
+is provisioned with an L1 and a shared eDRAM L2 \emph{elastic caches} that support variable width cache lines.  
+The elastic cache design exploits the unique properties of DiRAM4 which supports many more narrow width memory channels than traditional high bandwidth memory.
 This memory sub-system will efficiently support both sparse/random and dense/sequential memory accesses for efficient matrix operations. 
 Lastly, we will design a high-speed link with state-of-the-art charge-based and injection-locking circuit techniques, which will allow us to provide the target 1TBps bandwidth for inter-tile communications under the tight chip power constraint.
-%This link will 
-%power-efficiently 
-%be designed 
 
-
-%With GAMA tiles
-Further improving the GAMA system's performance,  %we will further enhance the GAMA system. 
-%additional metadata information 
-we first propose to enhance the memory sub-system such that GAMA accelerators can leverage stored semantic information related to the matrix representation and expected access patterns of a given matrix for more efficient memory accesses.   
-Second, we will build multiple enabling technologies to scale graph algorithms to 16 GAMA tiles and beyond. 
-Especially, we will implement hardware counters and hooks that assist software to efficiently balance the load and relax synchronization.
-%to measure load imbalances across GAMA tiles and provide an interface for software to decide on load migration strategies. 
-%to monitor barrier synchronization stalls and allow the application developer to specify when it is acceptable for a GAMA tile to elide a barrier. 
-
+For improving scalability the GAMA memory system will store the semantic information related to the matrix representation, and expected access patterns of a given matrix. Several hardware hooks will monitor  load imbalances across the GAMA tiles and provide an interface for software to decide on load migration strategies. We also plan to monitor barrier synchronization stalls and allow the application developer to specify when it is acceptable for a GAMA tile to elide a barrier. 
 
 %Using these high-speed links we will interconnect 16 GAMA tiles in a GAMA system. 
 %an elastic cache architecture that 
@@ -55,19 +34,19 @@ four companies on this project.
 Tezzaron will supply the DiRAM4 dies and support an integration path for graph processor including a memory controller soft IP that our team can enhance.
 eSilicon will provide the chip fabrication and 2.5D integration services.
 Nallatech will design a PCB that mounts 16 GAMA tiles and connects the tiles to the IBM OpenPower host system. % with our team, and fabricate it.
-IBM agreed to support OpenCAPI interface specification and IPs for integrating the GAMA tiles with IBM OpenPower host processors. 
+IBM will support OpenCAPI interface specification and IPs for integrating the GAMA tiles with IBM OpenPower host processors. 
 
 \vspace{3pt}
 \noindent
 \textbf{Success Metrics.} 
 We will use the following metrics for evaluations.
-We aim to achieve 1 Tera (or 0.5 Tera) ops/s for integer and floating-point sparse matrix operations per a GAMA tile while each GAMA tile consumes no more than 20W.
+We aim to achieve 1 Tera/0.5Tera ops/s for integer and floating-point sparse matrix operations, respectively, per a GAMA tile while each GAMA tile consumes no more than 20W.
 For the memory sub-system, we aim to utilize 95\% of 4TBps peak bandwidth of DiRAM4 with 50\% improvement in L2 cache hit rates with our elastic cache architecture.
 %and average memory access latency of \textbf{XX} cycles, and less than \textbf{1\%} memory overhead to store the metadata.
 For the inter-tile interconnect we expect to achieve per lane power efficiency in the order of 1mW/Gb/s to deliver the 1TBps link bandwidth. % of 1TBps between two tiles. 
 %We will provide a remote memory access latency of \textbf{XX} cycles for cross-tile data transfer. 
-Through active monitoring of load imbalance and workload migration we expect to achieve 90\% scaling efficiency as we scale from 1 to 16 tiles. 
-When the programmer is able to use relaxed synchronization appropriately we expect to gain super-linear performance scaling without any loss in accuracy or increased.  
+Through active monitoring of load imbalance and workload migration we expect to achieve 95\% scaling efficiency as we scale from 1 to 16 tiles. 
+When the programmer exploits relaxed synchronization support provided in hardware  we expect to gain super-linear performance scaling with limited accuracy and performance tradeoff.  
 Note that these metrics are evaluated on simulators in Phase 1, FPGA on Phase 2 and on a real system by Phase 3.  
 
 %MURALI: DO WE NEED TO SAY ANYTHING ABOUT THE CHIP ITSELF IN TERMS OF TIMING, NOISE, GUARD BANDS ETC.,
