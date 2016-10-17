@@ -9,10 +9,13 @@ duality between graph algorithms and their equivalent matrix operations forms a 
 \vspace{3pt}
 \noindent
 \textbf{Approach and Cross-layer Innovations.} 
-We propose to build a GAMA (Graph Acceleration through Matrix Abstraction) system to tackle critical challenges of graph processing. 
+We propose to build a GAMA (Graph Acceleration through Matrix Abstraction) system to tackle critical graph processing challenges. 
 %an accelerator architecture, called 
 Especially, given that graph algorithms place an enormous stress on the memory sub-system, 
-we will develop the GAMA tile, a processing-in-memory tile where an accelerator is 2.5D-stacked with 4$\times$8GB of DiRAM4 dies.
+we will develop the GAMA tile, processing-in-memory architecture where an accelerator is 2.5D-stacked with 
+4$\times$
+%8GB 
+DiRAM4 dies.
 % from Tezzaron. 
 
 First, to efficiently support a broad range of matrix operations, we aim to develop a many-core graph acceleration architecture. 
@@ -20,7 +23,9 @@ In this architecture, each low-power core is tightly coupled with 8-lane engines
 Second, exploiting the DiRAM4's unique properties, we aim to redesign the memory sub-system (the on-chip L1 and L2 caches and off-chip memory controller) with innovative circuit and architecture techniques. 
 This memory sub-system will efficiently support both sparse/random and dense/sequential memory accesses for efficient matrix operations. 
 Lastly, we will design a high-speed link circuit with innovative charge-based and injection-locking techniques. 
-This link will power-efficiently provide the target 1TBps bandwidth for inter-tile interconnections considering the tight chip power constraint.
+This link will 
+%power-efficiently 
+be designed to provide the target 1TBps bandwidth for inter-tile communications under the tight chip power constraint.
 
 
 To accomplish the target performance improvement of 1000$\times$ with more GAMA tiles, %we will further enhance the GAMA system. 
@@ -50,7 +55,7 @@ IBM agreed to provide OpenCAPI interface specification and IPs for integrating t
 \noindent
 \textbf{Success Metrics.} 
 We will use the following metrics for evaluations.
-We aim to achieve 1 Tera (or 0.5 Giga) ops/s for integer and floating-point operations per a GAMA tile while each GAMA tile consumes no more than 20W.
+We aim to achieve 1 Tera (or 0.5 Tera) ops/s for integer and floating-point sparse matrix operations per a GAMA tile while each GAMA tile consumes no more than 20W.
 For the memory sub-system, we aim to utilize 95\% of 4TBps peak bandwidth of DiRAM4 with 50\% improvement in L2 cache hit rates with our elastic cache architecture.
 %and average memory access latency of \textbf{XX} cycles, and less than \textbf{1\%} memory overhead to store the metadata.
 For the inter-tile interconnect we expect to achieve per lane power efficiency in the order of 1mW/Gb/s to deliver the 1TBps link bandwidth. % of 1TBps between two tiles. 
