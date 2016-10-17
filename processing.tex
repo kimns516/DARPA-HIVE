@@ -1,6 +1,7 @@
 \noindent
-The basic building block of the GAMA accelerator (Fig.~\ref{fig:arch}(b)) is the GAMA core, 
+The basic building block of the GAMA accelerator (Fig.~\ref{fig:arch}(b)) is the GAMA core,
 RISC-V processor with tightly coupled with an 8-lane acceleration engine to efficiently accelerate sparse matrix operations (Fig.~\ref{fig:arch}(c)).
+The core is architected to provide 16GOPs at 34mW and the estimated area is 0.5mm$^2$.
 We will first describe the microarchitecture of the GAMA core, and then describe the overall architecture of the GAMA accelerator.
 
 
@@ -34,7 +35,8 @@ For a given column, the column-major sparse matrix format allow us to easily ret
 After the processor determines the starting address and the number of NZVs of the corresponding column, 
 it also loads 8 pairs of a value and its row index in an entry of ``A-column buffer'' by executing a \texttt{LD64B}.
 As depicted, there are 8 ALUs for \textit{g}(), the value in the first pair of the B-column buffer is broadcast to all 8 ALUs as one of the operands.
-The 8 values in the first entry of A-column buffer are fed to 8 ALUs.
+The 8 values in the first entry of A-column buffer are fed to 8 ALUs supporting single-precision floating-point multiply-add operations.
+Note that if we focus on only graph traversing problems, all the NZVs will be ``1'' and a multiplication can be replaced with a ``AND'' operation, we power-gate the floating-point unit in the ALU and run the core at frequency higher than 2GHz. 
 
 
 The 8 computed results will be applied to the address generation logic with the 8 row indices from the first entry of A-column buffer,
@@ -45,7 +47,7 @@ Moreover, we will use the ALUs support three-operand computaions such as multipl
 
 
 After all the NZVs of column ``1'' of \textbf{A} is consumed in Fig.~\ref{fig:arch}(c), 
-the B-column buffer acting like a FIFO buffer makes the second entry the first one, and the processor brings the values and row indices of column 11 of \textbf{A}. 
+the B-column buffer acting like a FIFO buffer makes the second entry the first one, and the processor brings the values and row indices of column ``11'' of \textbf{A}. 
 Also, the row indices sotred in B-column buffer can be used for prefetching NZVs and the corresponding row indices of the next columns of \textbf{A} to A-column buffer.
 
 
