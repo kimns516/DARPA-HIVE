@@ -1,19 +1,22 @@
-HIVES calls for creation of processor-to-memory and processor-to-processor communication interfaces that can support extraordinarily high bandwidth exceeding 1TB/s or equivalently 8Tb/s. 
+\noindent
+%HIVES calls for creation of processor-to-memory and processor-to-processor communication interfaces that can support extraordinarily high bandwidth exceeding 1TB/s or equivalently 8Tb/s. 
+HIVES calls for creation of inter-tile communication interfaces that can support extraordinarily high bandwidth exceeding 1TBps.
 This requires a total of either 800 lanes operating at 10Gb/s/lane or 320 lanes operating at 25Gb/s/lane.  
 Such large number of lanes (even when spread across multiple chips) operating at high date rates poses many difficult challenges. 
-First, with a per-lane power efficiency of 10mW/Gb/s, the total power consumption will be in excess of 80W, which greatly complicates both the thermal design and power generation/distribution. 
-Second, interference and coupling resulting from operating a large number of closely spaced parallel lanes also severely limits performance. 
-Increasing the per lane data rate in an attempt to reduce the total number of lanes (for example, 50Gb/s/lane reduces the number of lanes to 160) is counter productive because it degrades power efficiency. 
-To elucidate this tradeoff further, increasing the data rate by a factor of 2 increases the channel loss by at least 6dB and circuit operating frequency by a factor of 2, both of which potentially increase the total by much more than 2x. 
+For example, the total power consumption of the state-of-the-art 10mW/Gb/s links will be in excess of 80W, 
+far exceeding the 20W power constraint.
+%Second, interference and coupling resulting from operating a large number of closely spaced parallel lanes also severely limits performance. 
+%Increasing the per lane data rate in an attempt to reduce the total number of lanes (for example, 50Gb/s/lane reduces the number of lanes to 160) is counter productive because it degrades power efficiency. 
+%To elucidate this tradeoff further, increasing the data rate by a factor of 2 increases the channel loss by at least 6dB and circuit operating frequency by a factor of 2, both of which potentially increase the total by much more than 2$\times$. 
 In view of this, we seek to architect new low-loss channels and connectors and improve the per lane energy efficiency to the order of 1mW/Gb/s. 
-Because Graph Analytics Processors are going to be designed to minimize processor idle time, dynamic power management techniques such as those described in a prior study\footnote{Anand et al., JSSC 2015} cannot be used to improve power efficiency. 
-Instead, the techniques that improve power efficiency at peak data are needed.
+%Because the GAMA tiles are going to be designed to minimize processor idle time, dynamic power management techniques such as those described in a prior study (Anand et al., JSSC 2015) cannot be used to improve power efficiency.  Instead, the techniques that improve power efficiency at peak data are needed.
+
 
 Large portion of the power consumed in multi-lane transceivers is used to perform equalization, clock generation/recovery/distribution and serializer/deserializer functions. 
-We have previously developed techniques to improve power efficiency of link building blocks. 
-In a previous study\footnote{Saxena et al., VLSIC 2015}, we utilized charge-based techniques to implement equalization (both continuous-time and decision feedback), serialization and deserialization to improve link power efficiency to about 3mW/Gb/s at 14Gb/s. 
-In another study\footnote{Elkholy et al., ISSCC 2016}, we recently demonstrated ultra low power clock generation methods using injection locking. 
-At 8GHz, the prototype clock multiplier achieves about 100fsrms-integrated jitter while consuming only 2mW. 
+We have previously developed techniques to improve power efficiency of link building blocks.
+In a previous study (Saxena et al., VLSIC 2015), we utilized charge-based techniques to implement equalization (both continuous-time and decision feedback), serialization and deserialization to improve link power efficiency to about 3mW/Gb/s at 14Gb/s. 
+In another study(Elkholy et al., ISSCC 2016), we recently demonstrated ultra low power clock generation methods using injection locking. 
+At 8GHz, the prototype clock multiplier achieves about $\rm 100 fs_{rms}$-integrated jitter while consuming only 2mW, resulting in more than 5dB improvement in the jitter/power figure-of-merit. 
 This low jitter makes such a clock generator suitable for 16Gb/s half-rate link architecture or even 32Gb/s quarter-rate operation. 
 So far, neither circuit nor architectural techniques to lower clock distribution power have been explored. 
 Further, commonly used dual-loop clock and data recovery (CDR) architecture further exacerbates this issue, as it needs multiple clocks with precise phase spacing to perform linear phase interpolation (PI). 
