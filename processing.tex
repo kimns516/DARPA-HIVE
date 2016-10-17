@@ -1,3 +1,106 @@
+\noindent
+The basic building block of the GAMA accelerator (Fig.~\ref{fig:arch}(b)) is the GAMA core, 
+RISC-V processor with tightly coupled with an 8-lane acceleration engine to efficiently accelerate sparse matrix operations (Fig.~\ref{fig:arch}(c)).
+We will first describe the microarchitecture of the GAMA core, and then describe the overall architecture of the GAMA accelerator.
+
+
+It has been shown that a wide range of graph algorithms can be implemented by a general case of matrix multiply \textbf{C} = \textbf{A} \textit{f}().\textit{g}() \textbf{B} 
+For example, a matrix-vector multiply (i.e., \textbf{C} = \textbf{A} +.$\times$ \textbf{B}) represents an one-hop BFS 
+where \textbf{A} is a $N \times N$ connectivity matrix, \textbf{B} is a $1 \times N$ vector of the starting node, 
+\textit{g}($i$, $j$) returns $a_{i,j} \times b_{j}$ and \textit{f}($i$) returns $\sum_{j=1}^{N}$ \textit{g}($i$,$j$).
+
+
+As large graphs are often represented by very sparse matrices, compressed formats are widely used to storage-efficiently store the matrices.
+However, this complicates matrix operations and requires random/irregular memory accesses especially for constructing \textbf{C} in a compressed format on the fly.
+After carefully analyzing the state-of-the-art DCSC and DCSR formats and matrix operations based on these formats, 
+we propose the GAMA core microarchitecture depicted in Fig.~\ref{fig:arch}(c).
+That is, an 8-lane engine to accelerate sparse matrix operations is tightly coupled with a RISC-V processor. 
+
+
+In this microarchitecture, we first aim to avoid storing \textbf{A} and \textbf{B} in multiple formats, which often simplifies the accesses of specific elements of \textbf{A} and \textbf{B} for matrix operation.
+Our microarchitecture can handle both row- and colum-major formats, but suppose both \textbf{A} and \textbf{B} are stored in DCSC or similar column-major format for the brevity of description.
+In such a format, non-zero values (NZVs) in a given column are already sorted in row order and stored in an array sequentially. 
+
+
+In large matrices of HIVE project's interest, we assume that the number of rows with NZVs in a column is still much larger than that of processing elements in a core.
+First we introduce  A- and B-column buffers. 
+Each buffer consists of one or more 64-byte entries, each of which can be loaded by one special load instruction (\texttt{LD64B}) that we will implement in the RISC-V processor. 
+A buffer entry stores 8 pairs of a value and its row index from a column of a matrix. 
+
+
+Consider the first pair in ``B-column buffer'' in Fig.~\ref{fig:arch}(c).
+The row index determines the column index of \textbf{A} stored in DCSC or similar column major format.
+For a given column, the column-major sparse matrix format allow us to easily retrieve the starting address and the number of NZVs sequentially stored in the array. 
+After the processor determines the starting address and the number of NZVs of the corresponding column, 
+it also loads 8 pairs of a value and its row index in an entry of ``A-column buffer'' by executing a \texttt{LD64B}.
+As depicted, there are 8 ALUs for \textit{g}(), the value in the first pair of the B-column buffer is broadcast to all 8 ALUs as one of the operands.
+The 8 values in the first entry of A-column buffer are fed to 8 ALUs.
+
+
+The 8 computed results will be applied to the address generation logic with the 8 row indices from the first entry of A-column buffer,
+the column index of values in B-column buffer, and the starting address of the heap associated with the column index of B-column buffer.
+The heap is used to construct \textbf{C} (cf. A. Buluc, et al., ``On the Representation and Multiplication of Hypersparse Matrices,'' IDPDS, 2008)
+As the access pattern of the heap is very random, these 8 values with random addresses will be stored to our elastic L1D cache (cf. Sec.~\ref{sec:memory:on-chip}) with 8 banks to support 8 concurrent accesses to 8 different random addresses.
+Moreover, we will use the ALUs support three-operand computaions such as multiply-add to efficiently support the accumulation of values computed by 8 values to the corresponding values of \textbf{C} stored in the heap.
+
+
+After all the NZVs of column ``1'' of \textbf{A} is consumed in Fig.~\ref{fig:arch}(c), 
+the B-column buffer acting like a FIFO buffer makes the second entry the first one, and the processor brings the values and row indices of column 11 of \textbf{A}. 
+Also, the row indices sotred in B-column buffer can be used for prefetching NZVs and the corresponding row indices of the next columns of \textbf{A} to A-column buffer.
+
+
+The RISC-V processor has 4KB IL1 and 32KB 8-bank DL1 caches.
+The processor will be enhanced to efficiently perform various management tasks for the acceleration engine such as:
+calculating the starting memory addresses of arrays containing NZVs and their associated row values of columns; and
+controlling the data-flow of the acceleration engin for merging operations for constructing \textbf{C} through the heap.
+ 
+
+%Then it issues an instruction that brings 64 bytes containing 8 pairs of row index and associated value and store them . 
+%is to process elements from a (subset of) row of \textbf{A} and a (subset of) column of \textbf{B} (Fig.~\ref{fig:acc-arch}(b)).
+%This is advantageous for a given \textit{f}($i$) to efficiently operate on \textbf{g}($i$, $j$).
+%For efficient execution of complex \textbf{g}() and \textbf{f}(), we propose to use 
+
+
+The architecture of a GAMA accelerator is composed of four MIMD clusters, and the cluster architecture is depicted in Figure~\ref{fig:arch}(b).
+A cluster consists of 16 cores operating at 2GHz and connected to a special 512KB eDRAM-based L2 cache (cf. Sec.~\ref{sec:memory:on-chip}) and a 16GBps on-chip interconnect between them. 
+An eDRAM L2 cache can be connected to one of 16 DiRAM4 memory controllers, each of which is connected to a 64-bit (16GBps) DiRAM4 memory channel, through switches.
+Moreoever, a core can send a memory request to a port of the OpenCAP link consisting of 16 ports and providing 256GBps aggregate bandwidth, as well as network on-chip (NOC) interconnects to three other clusters.  
+%which are connected to each other through on-chip network.
+
+
+\begin{comment}
+\noindent
+\textbf{Coarse-Grained Reconfigurable Processing Engine:} 
+To efficiently execute graph primitives, we aim to architect the CGR-Core with a coarse-grain reconfigurable (CGR) array of execution units. 
+This architecture based on a spatial data-flow architecture can significantly reduce the overhead of instruction fetches and data transfers within an accelerator, as many operations for a complex graph primitive function can be executed by a single (macro) instruction and a few registerfile and/or cache accesses. 
+Furthermore, for streaming graph analytics, it is very inefficient to apply computations and changes to individual vertices as they arrive. 
+We propose the update buffer to allow CGR-Core to bulk commit messages bound for (or coming from) multiple vertices in a single phase.
+\end{comment}
+
+
+
+\begin{comment}
+\noindent
+\textbf{Trailblazer:} 
+One of the unique properties of graph algorithms is that all vertices perform the same computation (with some limited control flow support). 
+Hence, the execution behavior of future vertex computations can be easily inferred from current vertex computations. 
+We will use the notion of trailblazing where some of the vertex computation tasks are closely monitored. 
+During trail blazing various microarchitectural events are monitored, such as memory bandwidth, branch behavior patterns and affinity of communication between different vertices. 
+We hypothesize that there are pairs of vertices that exhibit dominant communication patterns which can be inferred from trail blazing. 
+We will use the knowledge from trailblazing to potentially co-locate affine vertices to the same compute node. 
+The notion of trail blazing was used for prefetching irregular data in CPUs, but we plan to apply similar principle for managing vertex computations.
+
+%which is a 16-wide SIMD pipeline that is optimized by vector multiply-accumulate operations. 
+%Each core is provisioned with \emph{Elastic} L1D cache.  
+
+%32 corelets are placed on a single die and share a single large L2 cache designed using eDRAM. The L2 cache is then backed up by 4X8GB DiRAM4 memory modules. DiRAM4 is a die-stacked DRAM die that is provided by Tezzaron (one of our service providers in this project). The 32 corelets are 2.5D stacked with DiRAM4. This entire package is called a GAMA tile. We will integrate 16 GAMA tiles to create the whole GAMA accelerator system. 16 GAMA tiles are interconnected  using our custom-designed 1Tbps inter-tile interface. The GAMA system is interfaced with IBM Power8-based host system using OpenCAPI interface. 
+%At each layer of the above design we propose several innovative ideas. At the corelet layer we propose to design specialized address mapping engines that translate the sparse matrix indices to generate the row/column index of matrix elements based on the underlying sparse matrix format. While the 32 GAMA corelets can do MIMD computations they can  be dynamically reconfigured to execute a single instruction across a very wide vector range when accesses are highly sequential.  The elastic  cache attached to each corelet is architected to support both dense/sequential and sparse/random accesses to a matrix. The elastic cache is a low-overhead cache organization that supports variable width cache lines to improve cache usage efficiency.  
+% The unique aspect of DiRAM4 memory, compared to other competing memories such as high bandwidth memory, is that each DiRAM4 die supports more channels per die, but uses narrow width channels. Such a design is well suited for graph workloads that need narrow width memory level parallelism. The narrow width channels can be reconfigured to create a single wide width channel to support dense matrices. The memory layer itself is made semantically aware of the matrix structure and its preferred lay out and access patterns in memory. The semantic awareness comes from application provided hints that are conveyed to the memory controller through APIs. Since graphs that are spread over multiple tiles demand high bandwidth inter-tile access. High-bandwidth links  posing power, thermal, and signal integrity challenges.  We tackle this challenge with various charge-based and injection-locking techniques for high-speed links. The scalability of parallel graph algorithms will be improved by enabling barrier elision hardware that can be used by the application developer to tradeoff accuracy with latency. We provide an in-depth visibility to software to monitor changes to the graph structure and take action to deal with potential load imbalances.  
+
+%32 corelets are placed on a single die and share a single large L2 cache designed using eDRAM. The L2 cache is then backed up by 4X8GB DiRAM4 memory modules. DiRAM4 is a die-stacked DRAM die that is provided by Tezzaron (one of our service providers in this project). The 32 corelets are 2.5D stacked with DiRAM4. This entire package is called a GAMA tile. We will integrate 16 GAMA tiles to create the whole GAMA accelerator system. 16 GAMA tiles are interconnected  using our custom-designed 1Tbps inter-tile interface. The GAMA system is interfaced with IBM Power8-based host system using OpenCAPI interface. 
+%At each layer of the above design we propose several innovative ideas. At the corelet layer we propose to design specialized address mapping engines that translate the sparse matrix indices to generate the row/column index of matrix elements based on the underlying sparse matrix format. While the 32 GAMA corelets can do MIMD computations they can  be dynamically reconfigured to execute a single instruction across a very wide vector range when accesses are highly sequential.  The elastic  cache attached to each corelet is architected to support both dense/sequential and sparse/random accesses to a matrix. The elastic cache is a low-overhead cache organization that supports variable width cache lines to improve cache usage efficiency.  
+% The unique aspect of DiRAM4 memory, compared to other competing memories such as high bandwidth memory, is that each DiRAM4 die supports more channels per die, but uses narrow width channels. Such a design is well suited for graph workloads that need narrow width memory level parallelism. The narrow width channels can be reconfigured to create a single wide width channel to support dense matrices. The memory layer itself is made semantically aware of the matrix structure and its preferred lay out and access patterns in memory. The semantic awareness comes from application provided hints that are conveyed to the memory controller through APIs. Since graphs that are spread over multiple tiles demand high bandwidth inter-tile access. High-bandwidth links  posing power, thermal, and signal integrity challenges.  We tackle this challenge with various charge-based and injection-locking techniques for high-speed links. The scalability of parallel graph algorithms will be improved by enabling barrier elision hardware that can be used by the application developer to tradeoff accuracy with latency. We provide an in-depth visibility to software to monitor changes to the graph structure and take action to deal with potential load imbalances.  
+
 %%%
 %%% An accelerator architecture and processor pipeline which supports the processing of identified graph primitives in a native matrix format.
 %%%
@@ -6,14 +109,6 @@
 % I think we should propose a processing core that can perform well for sparse matrix computations. 
 % Also look at ``Standards for Graph Algorithm Primitives.'' This shows that graph algorithms such as BFS can be done with sparse matrix multiplications.
 % That is, we should propose a processing pipeline that can efficiently do sparse matrix.
-
-% FP fused multiply-add units
-% specialized
-\noindent
-It has been shown that a wide range of graph algorithms can be implemented by a general case of matrix multify \textbf{C} = \textbf{A} \textit{f}().\textit{g}() \textbf{B} 
-For example, a standard (sparse) matrix-vector multiply (i.e., \textbf{C} = \textbf{A} +.$\times$ \textbf{B}) represents an one-hop BFS 
-where \textbf{A} is a $N \times N$ connectivity matrix, \textbf{B} is a $1 \times N$ vector of the starting node, 
-\textit{g}($i$, $j$) returns $a_{i,j} \times b_{j}$ and \textit{f}($i$) returns $\sum_{j=1}^{N}$ \textit{g}($i$,$j$).
 
 In this project, we aim to architect processor pipeline that can efficient support more general cases of sparse matrix multiply (Fig.~\ref{fig:acc-arch}).
 Toward this goal, we envision an MIMD architecture where 16 processors constitute a cluster.
@@ -25,54 +120,6 @@ Supposing \textbf{A} is stored in CSR format,
 The processors and A-/B-caches are connected by two 16$\times$16 crossbars (denoted by A- and B-xbars), respectively.
 Each processor is an in-order processor with a coarse-grain reconfigurable (CGR) execution unit.
 
-Accumulator-based architecture.
-the detailed cache architecture is described in Section~\ref{sec:memory}.
-
-SRUMMA algorithm
-% {index, value} = 8 bytes
-% 
-%32-bit AGU
-%32-bit ALU
-
-%(2) a 2-port 16-entry register file (RF);
-%(3) a 4KB instruction cache;
-%(3) a 4KB instruction cache;
-%-entry FIFO buffer in front of the execution unit;
-%(3) 
-
 supporting single (complex) operation per cyle in terms of its throughput  
-
-is to process elements from a (subset of) row of \textbf{A} and a (subset of) column of \textbf{B} (Fig.~\ref{fig:acc-arch}(b)).
-This is advantageous for a given \textit{f}($i$) to efficiently operate on \textbf{g}($i$, $j$).
-For efficient execution of complex \textbf{g}() and \textbf{f}(), we propose to use 
-
-(Fig.~\ref{fig:acc-arch}(c)).
-(Fig.~\ref{fig:acc-arch}(b)).
-(Fig.~\ref{fig:acc-arch}(b)).
-(Fig.~\ref{fig:acc-arch}(b)).
-
-
-its own small instruction cache
-Generally, a sparse matrix is compressed and each element is associated with row and column indices which are stored in memory.
-
-%% prefetching row and col indices?
-
-\begin{comment}
-\noindent
-\textbf{Coarse-Grained Reconfigurable Processing Engine:} 
-To efficiently execute graph primitives, we aim to architect the CGR-Core with a coarse-grain reconfigurable (CGR) array of execution units. 
-This architecture based on a spatial data-flow architecture can significantly reduce the overhead of instruction fetches and data transfers within an accelerator, as many operations for a complex graph primitive function can be executed by a single (macro) instruction and a few registerfile and/or cache accesses. 
-Furthermore, for streaming graph analytics, it is very inefficient to apply computations and changes to individual vertices as they arrive. 
 \end{comment}
 
-We propose the update buffer to allow CGR-Core to bulk commit messages bound for (or coming from) multiple vertices in a single phase.
-
-\noindent
-\textbf{Trailblazer:} 
-One of the unique properties of graph algorithms is that all vertices perform the same computation (with some limited control flow support). 
-Hence, the execution behavior of future vertex computations can be easily inferred from current vertex computations. 
-We will use the notion of trailblazing where some of the vertex computation tasks are closely monitored. 
-During trail blazing various microarchitectural events are monitored, such as memory bandwidth, branch behavior patterns and affinity of communication between different vertices. 
-We hypothesize that there are pairs of vertices that exhibit dominant communication patterns which can be inferred from trail blazing. 
-We will use the knowledge from trailblazing to potentially co-locate affine vertices to the same compute node. 
-The notion of trail blazing was used for prefetching irregular data in CPUs, but we plan to apply similar principle for managing vertex computations.
