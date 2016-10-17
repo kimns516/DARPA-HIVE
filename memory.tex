@@ -21,10 +21,89 @@ Our preliminary study exhibits that the memory bandwidth utilization is very low
 This is because these algorithms often require random/sparse memory accesses, whereas the memory hierarchy is optimized only for sequential/dense memory accesses.
 The study also shows that we must re-design the entire memory hierarchy if we are going to effectively support both random/sparse and sequential/dense memory accesses.
 That is, optimizing either on-chip caches or off-chip memory alone is ineffective.
-Thus, we propose to architect the GAMA memory system, consisting of (1) a private L1 cache for each corelet, (2) a shared spatially-temporally boosted eDRAM cache across all corelets within a GAMA tile, and (3) 32GB of DiRAM4, to efficiently support random/sparse and sequential/dense memory accesses.
+Thus, we propose to architect the GAMA memory system, consisting of (1) a private L1 cache for each GAMA core; (2) shared spatially-temporally boosted eDRAM L2 caches across all the cores within a GAMA tile; and (3) 32GB of DiRAM4 with a custom memory controller, to efficiently support random/sparse and sequential/dense memory accesses.
 More specifically, it will be built on circuit/architecture techniques and a soon-to-be-released DRAM technology and achieve the target 90\% utilization of memory bandwidth. 
 
+
+\subsubsection{On-Chip Cache Architecture.} 
+\label{sec:memory:on-chip}
 \noindent
+\textbf{L1 cache.}
+We propose elastic cache architecture to efficiently support both narrow- and wide-width memory accesses from multiple non-contiguous memory locations to co-reside in a single 64-byte cache line. 
+Specifically, we introduce a concept of chunk tags to store tags for narrow-width data blocks (e.g., 4-, 8-, or 16-byte byte blocks) along with a conventional tag (referred to as common tag) for each 64-byte cache line (see Fig.~\ref{fig:elastic-cache}). 
+Chunk tags add only a small storage overhead. 
+Elastic cache allows us to efficiently use cache lines for storing narrow-width data blocks from non-contiguous addresses (i.e. the heap memory accesses to construct \textbf{C} on the fly, 
+which may be seen in sparse matrices, as well as a 64-byte contiguous blocks that may be seen in dense matrices without significant cache reorganization. 
+Note that just adopting narrow cache lines is not efficient to handle sequential memory requests for dense datasets according to our experiments.
+Our preliminary study shows this architecture applied to L1 caches of a traditional GPU architecture improve the performance by more than 2$\times$ for SPMV.
+We expect that the performance can much further improved when the architecture is also applied to large L2 cache.
+
+
+%Note that just adopting narrow cache lines is not efficient to handle sequential memory requests for dense datasets according to our experiments.
+%Figure~\ref{fig:elastic-cache-flow} describes the access flow of the proposed \texttt{Elastic-Cache}. 
+%Note that we will employ the proposed \texttt{Elastic-Cache} architecture for both private SRAM-based L1 and shared eDRAM-based L2 caches.
+
+\begin{wrapfigure}{r}[0pt]{0.4\textwidth}
+\center
+\includegraphics[width=1.0\linewidth]{./fig/chunk_tag_16bit-eps-converted-to.pdf}
+%\caption{The chunk and common tags to support both narrow- and wide-width on-chip cache accesses for a 4-way 16KB cache.}
+\caption{The chunk and common tags to support elastic cache accesses for a 4-way 16KB cache.}
+\label{fig:elastic-cache}
+\end{wrapfigure}
+
+
+Considering our core architecture with a 8-lane engine (cf. Sec.~\ref{sec:processing}), 
+we will architect the elastic L1 cache with 8 banks, each of which is 4KB and provides 4 bytes per cycle. 
+This architecture is preferrable, as the 8-lane SIMD engine with the address generation logic 
+in Fig.~\ref{fig:arch}(c) can simultaneously request 8 memory accesses to different addresses for the heap memory accesses.
+%The connection between an elastic L1 cache and a corelet is described in Section~\ref{sec:processing}.
+
+\begin{wrapfigure}{r}[0pt]{0.35\textwidth}
+\center
+\includegraphics[width=2.4in, trim=20 20 10 50]{./fig/boosting.pdf}
+\caption{A boosting scheme for the cache with 3T eDRAM bitcells.} 
+%Red dashed outlines highlight the portions receiving boosting/underdriving. It is critical to protect dynamic nodes from coupling noises of boosting via parasitic capacitors (gray).}
+\label{fig:boosting}
+\end{wrapfigure}
+
+%\vspace{3pt}
+\noindent
+\textbf{L2 cache.}
+The L2 cache is shared amongst 32 GAMA cores and is implemented with eDRAM and the same elastic cache architecture as L1 cache. 
+In implementing eDRAM cache, we aim to overcome relatively long latency of accessing eDRAM cache compared with SRAM cache. 
+%minimize latency %and support \texttt{Elastic-Cache} data access. 
+%In the eDRAM based L2, it is particularly critical to 
+%In this project, %building upon our recent work on low-energy and compact memory-based FFT core\footnote{ISSCC'17 submitted}, 
+We will apply a dynamic fine-grained spatial-temporal voltage boosting technique only on the peripheral circuits (address decoders, multiplexers/demultiplexers, and interconnect buffers), but not bitcells. 
+This boosting technique is synergistic with the elastic cache architecture and beneficial for graph algorithms that often need to access a small subset of a large cache line without dissipating excessive power. 
+We will explore voltage boosting in a temporarily and spatially fine-grained fashion for improving access latency and throughput (cf. Fig.~\ref{fig:boosting}). 
+We will also effectively gate or use low supply voltage (e.g., 0.6V or lower) for the circuits that are not involved in accessing the demand data, making them serve as thermal buffers. 
+%This way, we expect to significantly improve latency still under the thermal limit. 
+Assuming 0.5V threshold voltage ($V_T$), 
+%\footnote{High $V_T$ is common in embedded memory for suppressing leakage}
+boosting from 0.8V to 1.4V can increase the overdrive level ($V_{DD}$-$V_T$) from 0.3V to 0.9V, improving latency and throughput by at least 3$\times$. 
+%The low $V_{DD}$ used in the rest of cache circuits can save a significant amount of leakage energy dissipation. 
+By exploiting this latency improvement, we will explore to make the cache systems to perform multiple fine-grained data accesses (in serial by default but in parallel if data are in the multiple banks) and pack and send them back to the pipeline of a core. 
+To enable such voltage boosting in a short time period without exceeding the power/thermal limit, 
+we will also adopt innovative circuit techniques.
+
+
+\begin{comment}
+To enable such voltage boosting, we need to meet two requirements.  First, we need to boost voltage in a fraction of cycle time. 
+This can be achieved first by having strong power-grid for boosted voltage, together with a good amount of decoupling capacitors circuits. 
+Still, the power grid, due to the sub-nanosecond transient change, can undergo a non-negligible amount of voltage integrity degradation (i.e., droops, overshoot, and ripples). 
+%Over-designing power grids and decoupling capacitors can incur significant area and energy overhead. 
+Our approach to this challenge is to apply techniques that tolerate such problems in power grids through in-situ error detection and correction (EDAC), as EDAC can detect and correct timing errors from supply voltage droop without over-design and the worst-case margin. Specifically, we will develop an EDAC technique that primarily focuses on detecting errors and allowing instruction replays to deal with error correction.
+
+Second, we need small and precise thermal monitoring systems to stop voltage overdrive if temperature rises above a temperature limit. 
+Note that existing state-of-the-art in on-chip thermal monitoring, however, have been limited due to sensor circuits that are too invasive in terms of size ($>$ a few thousand $\mu m^2$ per sensor) and voltage-scalability (requiring $>$ 1V). 
+This limitation prevents sensors from being placed closely to digital hotspots. 
+In this project, we will create improved thermal monitoring systems for embedded memory based on our recent thermal sensor designs that achieves about two orders of magnitude more compact (30 $\mu m^2$ per sensor), comparably or more accurate ($\pm 1.1^oC$ 3-$\sigma$ error), and voltage scalable down to 0.4V  \footnote{T. Yang et al., ``Ultra-compact and Voltage-Scalable Temperature Sensor Design for Dense Dynamic Thermal Management Techniques,'' \textit{IEEE Journal of Solid-State Circuits (JSSC)}, 2015; S. Kim et al., ``A $30.1\mu m^{2}$, $\pm 1.1^{o}C$-$3\sigma$-Error, 0.4-to-1.0V Temperature Sensor based on Direct Threshold-Voltage Sensing for Dense On-Chip Thermal Monitoring,'' \textit{IEEE Custom Integrated Circuits Conference (CICC)}, 2015}. 
+%By placing such sensors closely to estimated hotspots, we anticipate to achieve high accuracy in thermal monitoring, which will allow us to use voltage boosting longer and more frequently without pessimistic throttling. 
+Furthermore in eDRAM caches, accurate thermal sensing will be used to adaptively change the refresh cycles, saving energy and increasing access availability. 
+\end{comment}
+
+
 \subsubsection{Off-Chip Memory Architecture.} 
 \label{sec:memory:off-chip}
 \noindent
@@ -52,6 +131,7 @@ The datamap enables the memory controller to infer how consecutive elements of a
 The front-end memory queue buffers requests from corelets across the entire GAMA system, as all GAMA tiles see a globally shared address space (see \textbf{``Memory model''}). 
 The memory queue monitors requests from multiple corelets and identifies all the requests that are bound to a given bank or channel. 
 It will then pull all the data from a single channel that may satisfy multiple corelet requests.  
+
 
 To enable efficient coalescing the memory queue may delay memory requests for a short interval that does not affect the utilization of processing pipeline and memory channel. 
 As each GAMA tile computes over a small slice of compressed vectors (or a slice of a row or column in a dense matrix) we expect that memory requests from different corelets within each tile may exhibit spatial locality. 
@@ -114,80 +194,6 @@ To enable such optimizations the corelet must first construct the non-zero colum
  
 %The L2 cache line size is 64 bytes. As we will discuss later the cache supports variable granularity  cache line size, which we call elastic cache. Hence, a single 64 line may contain up to four 16-byte chunks from different addresses.  
 
-
-\subsubsection{On-Chip Cache Architecture.} 
-\label{sec:memory:on-chip}
-\noindent
-\textbf{L1 cache.}
-We propose elastic cache architecture to efficiently support both narrow- and wide-width memory accesses from multiple non-contiguous memory locations to co-reside in a single 64-byte cache line. 
-Specifically, we introduce a concept of chunk tags to store tags for narrow-width data blocks (e.g., 4-, 8-, or 16-byte byte blocks) along with a conventional tag (referred to as common tag) for each cache line (see Figure~\ref{fig:elastic-cache}). 
-Chunk tags add only a small storage overhead. Elastic cache allows us to efficiently use 64-byte cache lines for storing narrow-width data blocks from non-contiguous addresses, that may be seen in sparse matrices, as well as a 64-byte contiguous  blocks that may be seen in dense matrices without significant cache reorganization. 
-Note that just adopting narrow cache lines is not efficient to handle sequential memory requests for dense datasets according to our experiments.
-Our preliminary study shows this architecture applied to L1 caches of a traditional GPU architecture improve the performance by more than 2$\times$ for SPMV.
-We expect that the performance can much further improved when the architecture is also applied to large L2 cache.
-
-
-%Note that just adopting narrow cache lines is not efficient to handle sequential memory requests for dense datasets according to our experiments.
-%Figure~\ref{fig:elastic-cache-flow} describes the access flow of the proposed \texttt{Elastic-Cache}. 
-%Note that we will employ the proposed \texttt{Elastic-Cache} architecture for both private SRAM-based L1 and shared eDRAM-based L2 caches.
-
-\begin{wrapfigure}{r}[0pt]{0.4\textwidth}
-\center
-\includegraphics[width=1.0\linewidth]{./fig/chunk_tag_16bit-eps-converted-to.pdf}
-\caption{The chunk and common tags to support both narrow- and wide-width on-chip cache accesses for a 4-way 16KB cache.}
-\label{fig:elastic-cache}
-\end{wrapfigure}
-
-\begin{comment}
-\begin{wrapfigure}{r}[0pt]{0.4\textwidth}
-\center
-\includegraphics[width=1.0\linewidth]{./fig/flow_chart-eps-converted-to.pdf}
-\caption{Access flow of \texttt{Elastic-Cache}. \texttt{CT}, \texttt{CKT}, and \texttt{CK} denote common tag, chunk tag, and chunk.}
-\label{fig:elastic-cache-flow}
-\end{wrapfigure}
-\end{comment}
-
-Considering our corelet architecture with a 16-lane SIMD engine (cf. Section~\ref{sec:processing}), we will architect to architect the elastic L1 cache with 16 banks, each of which is 4KB and provides 4 bytes per cycle. 
-This architecture is preferrable, as the 16-lane SIMD engine can simultaneously request 16 memory accesses to different addresses.
-The connection between an elastic L1 cache and a corelet is described in Section~\ref{sec:processing}.
-
-\vspace{3pt}
-\noindent
-\textbf{L2 cache.}
-% 10/12 MS edited three paragraphs below. 
-%We will implement the L1 and L2 caches using SRAM and eDRAM bitcells. 
-The L2 cache is shared amongst 32 GAMA corelets and is implemented using eDRAM. In implementing eDRAM-based L2 cache, we aim to %minimize latency %and support \texttt{Elastic-Cache} data access. 
-%In the eDRAM based L2, it is particularly critical to 
-overcome relatively long latency of accessing eDRAM cache compared with SRAM cache. 
-%In this project, %building upon our recent work on low-energy and compact memory-based FFT core\footnote{ISSCC'17 submitted}, 
-We will apply a dynamic fine-grained spatial-temporal voltage boosting technique only on the peripheral circuits (address decoders, multiplexers/demultiplexers, and interconnect buffers), but not bitcells. 
-This boosting technique is synergistic with the elastic cache architecture and beneficial for graph algorithms that often need to access a small subset of a large cache line without dissipating excessive power. 
-We will explore voltage boosting up to the thermal/reliability-limited level in a temporarily and spatially fine-grained fashion for improving access latency and throughput. 
-We will also effectively gate or use low supply voltage (e.g., 0.6V or lower) for the circuits that are not involved in accessing the demand data, making them serve as thermal buffers. 
-%This way, we expect to significantly improve latency still under the thermal limit. 
-Assuming 0.5V threshold voltage ($V_T$)\footnote{High $V_T$ is common in embedded memory for suppressing leakage}, boosting from 0.8V to 1.4V can increase the overdrive level ($V_{DD}$-$V_T$) from 0.3V to 0.9V, improving latency and throughput by at least 3X. 
-The low $V_{DD}$ used in the rest of cache circuits can save a significant amount of leakage energy dissipation. 
-By exploiting this latency improvement, we will explore to make the cache systems to perform multiple fine-grained data accesses (in serial by default but in parallel if data are in the multiple banks) and pack and send them back to the pipeline of a corelet. 
-
-\begin{wrapfigure}{r}[0pt]{0.35\textwidth}
-\center
-\includegraphics[width=2.4in, trim=20 20 10 50]{./fig/boosting.pdf}
-\caption{A boosting scheme for the L2 cache using 3T eDRAM bitcells. Red dashed outlines highlight the portions receiving boosting/underdriving. It is critical to protect dynamic nodes from coupling noises of boosting via parasitic capacitors (gray).}
-\label{fig:boosting}
-\end{wrapfigure}
-
-To enable such voltage boosting, we need to meet two requirements.  First, we need to boost voltage in a fraction of cycle time. 
-This can be achieved first by having strong power-grid for boosted voltage, together with a good amount of decoupling capacitors circuits. 
-Still, the power grid, due to the sub-nanosecond transient change, can undergo a non-negligible amount of voltage integrity degradation (i.e., droops, overshoot, and ripples). 
-%Over-designing power grids and decoupling capacitors can incur significant area and energy overhead. 
-Our approach to this challenge is to apply techniques that tolerate such problems in power grids through in-situ error detection and correction (EDAC), as EDAC can detect and correct timing errors from supply voltage droop without over-design and the worst-case margin. Specifically, we will develop an EDAC technique that primarily focuses on detecting errors and allowing instruction replays to deal with error correction.
-
-Second, we need small and precise thermal monitoring systems to stop voltage overdrive if temperature rises above a temperature limit. 
-Note that existing state-of-the-art in on-chip thermal monitoring, however, have been limited due to sensor circuits that are too invasive in terms of size ($>$ a few thousand $\mu m^2$ per sensor) and voltage-scalability (requiring $>$ 1V). 
-This limitation prevents sensors from being placed closely to digital hotspots. 
-In this project, we will create improved thermal monitoring systems for embedded memory based on our recent thermal sensor designs that achieves about two orders of magnitude more compact (30 $\mu m^2$ per sensor), comparably or more accurate ($\pm 1.1^oC$ 3-$\sigma$ error), and voltage scalable down to 0.4V  \footnote{T. Yang et al., ``Ultra-compact and Voltage-Scalable Temperature Sensor Design for Dense Dynamic Thermal Management Techniques,'' \textit{IEEE Journal of Solid-State Circuits (JSSC)}, 2015; S. Kim et al., ``A $30.1\mu m^{2}$, $\pm 1.1^{o}C$-$3\sigma$-Error, 0.4-to-1.0V Temperature Sensor based on Direct Threshold-Voltage Sensing for Dense On-Chip Thermal Monitoring,'' \textit{IEEE Custom Integrated Circuits Conference (CICC)}, 2015}. 
-%By placing such sensors closely to estimated hotspots, we anticipate to achieve high accuracy in thermal monitoring, which will allow us to use voltage boosting longer and more frequently without pessimistic throttling. 
-Furthermore in eDRAM caches, accurate thermal sensing will be used to adaptively change the refresh cycles, saving energy and increasing access availability. 
 
 \begin{comment}
 To enable such voltage boosting, we need to meet two requirements. 
