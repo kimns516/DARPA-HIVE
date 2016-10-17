@@ -5,9 +5,14 @@
 %%% processing schemes which typically struggle with cluster sizes above 16. Performers should
 %%% propose (with supporting evidence) an architecture and data flow model for which memory
 %%% latency, bandwidth, and capacity scale well with problem size.
+\subsection{1TB/s Link}
+\label{sec:link}
+\input{link}
+
 \noindent
 Scaling a GAMA tile to a 16-node GAMA system will face several challenges. First challenge is the load balancing across various  GAMA tiles. There are two sources of load imbalance. Assuming each tile may be assigned an equal number of vertices to process, but due to power law distribution some vertices may have significantly more number of edges to process. Figure~\ref{fig:loadimbalance} shows a typical load balance scenario that we have noticed in our own prior work on some graph applications~\cite{CITE}. The figure shows the wheel plots where each spoke in the wheel is the amount of computation assigned to one of 16 cores in a GPU. While GPU is a different baseline architecture the primary conclusion is that graph algorithms such as SSSP, BFS, APSP exhibit significant load imbalances. Our results also showed that this imbalance is present not only across cores but also within cores at different point in execution.  
  The second source of imbalance is the barrier synchronization that may be enforced at the end of each iteration. For instance, well known LU decomposition algorithms iteratively compute a inverse matrix. While one iteration may be executed in parallel the second iteration starts only at the end of first iteration. 
+
  
 \begin{wrapfigure}{r}[0pt]{0.4\textwidth}
 \center
