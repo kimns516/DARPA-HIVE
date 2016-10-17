@@ -5,13 +5,23 @@
 %%% processing schemes which typically struggle with cluster sizes above 16. Performers should
 %%% propose (with supporting evidence) an architecture and data flow model for which memory
 %%% latency, bandwidth, and capacity scale well with problem size.
-\subsection{1TB/s Link}
+\subsubsection{Power-efficient 1TB/s Link}
 \label{sec:link}
 \input{link}
 
+\subsubsection{Hardware Support for Load Balancing}
 \noindent
-Scaling a GAMA tile to a 16-node GAMA system will face several challenges. First challenge is the load balancing across various  GAMA tiles. There are two sources of load imbalance. Assuming each tile may be assigned an equal number of vertices to process, but due to power law distribution some vertices may have significantly more number of edges to process. Figure~\ref{fig:loadimbalance} shows a typical load balance scenario that we have noticed in our own prior work on some graph applications~\cite{CITE}. The figure shows the wheel plots where each spoke in the wheel is the amount of computation assigned to one of 16 cores in a GPU. While GPU is a different baseline architecture the primary conclusion is that graph algorithms such as SSSP, BFS, APSP exhibit significant load imbalances. Our results also showed that this imbalance is present not only across cores but also within cores at different point in execution.  
- The second source of imbalance is the barrier synchronization that may be enforced at the end of each iteration. For instance, well known LU decomposition algorithms iteratively compute a inverse matrix. While one iteration may be executed in parallel the second iteration starts only at the end of first iteration. 
+Scaling a GAMA tile to a 16-node GAMA system will face several challenges. 
+First challenge is the load balancing across various  GAMA tiles. 
+There are two sources of load imbalance. 
+Assuming each tile may be assigned an equal number of vertices to process, but due to power law distribution some vertices may have significantly more number of edges to process. 
+Fig.~\ref{fig:loadimbalance} shows a typical load balance scenario that we have noticed in our own prior work on some graph applications. 
+The figure shows the wheel plots where each spoke in the wheel is the amount of computation assigned to one of 16 cores in a GPU. 
+While GPU is a different baseline architecture the primary conclusion is that graph algorithms such as SSSP, BFS, APSP exhibit significant load imbalances. 
+Our results also showed that this imbalance is present not only across cores but also within cores at different point in execution.  
+The second source of imbalance is the barrier synchronization that may be enforced at the end of each iteration. 
+For instance, well known LU decomposition algorithms iteratively compute a inverse matrix. 
+While one iteration may be executed in parallel the second iteration starts only at the end of first iteration. 
 
  
 \begin{wrapfigure}{r}[0pt]{0.4\textwidth}
@@ -22,7 +32,13 @@ Scaling a GAMA tile to a 16-node GAMA system will face several challenges. First
 \end{wrapfigure}
 
 
-One way to detect the computational load is the number of non-zero elements that need to be processed in a row or column.  In a compressed sparse row (CSR)  representation it is easy to detect the number of non-zero entries in a row.  The row size can be easily inferred from the row pointer vector in CS. But finding the number of non-zero elements in a column requires scanning the column index vector to find all the "1"s that represent the first column values.  Instead of expensive scanning operation, we plan to augment each matrix with additional metadata bits to mark the number of non-zero elements in each row and column in a given matrix. Note that these are computed during the  initial data placement in memory or when intermediate matrices are generated. These counts are only approximate since we only plan to update them infrequently. Assuming graph structure changes slowly over time we believe these approximate counters provide good first order estimate for how much computation may be assigned to a given tile or a corelet within a tile. We propose to assign  corelets for processing a vertex in proportion to the edge counts. However this assignment needs to be monitored at runtime due to varying memory access delays. Even if the edge counts across two vertices are the same, namely the two sparse rows have similar number of non-zero entries, a given row may be laid out in memory across tiles leading to access latency imbalance. Hence, we will monitor how different tiles and corelets are  progressing to identify excessive imbalances. We will rely on a simple performance counting register that counts the number of load operations completed to monitor progress. These counters may be accessed by the  runtime or application layer to do computation migration and dynamic load balancing. %MURALI: SHOULD WE BE DOING ANY MIGRATION ASSISTANCE? 
+One way to detect the computational load is the number of NZVs that need to be processed in a row or column.  
+In (D)CSR it is easy to detect the number of NZVs in a row.  
+The row size can be easily inferred from the row pointer vector. 
+But finding the number of NZVs in a column requires scanning the column index vector to find all the ``1''s that represent the first column values.  
+%% Murali - this is not true in DCSC unless I misunderstand something. Please see On the Representation and Multiplication of Hypersparse Matrices.}
+Instead of expensive scanning operation, we plan to augment each matrix with additional metadata bits to mark the number of non-zero elements in each row and column in a given matrix. 
+Note that these are computed during the  initial data placement in memory or when intermediate matrices are generated. These counts are only approximate since we only plan to update them infrequently. Assuming graph structure changes slowly over time we believe these approximate counters provide good first order estimate for how much computation may be assigned to a given tile or a corelet within a tile. We propose to assign  corelets for processing a vertex in proportion to the edge counts. However this assignment needs to be monitored at runtime due to varying memory access delays. Even if the edge counts across two vertices are the same, namely the two sparse rows have similar number of non-zero entries, a given row may be laid out in memory across tiles leading to access latency imbalance. Hence, we will monitor how different tiles and corelets are  progressing to identify excessive imbalances. We will rely on a simple performance counting register that counts the number of load operations completed to monitor progress. These counters may be accessed by the  runtime or application layer to do computation migration and dynamic load balancing. %MURALI: SHOULD WE BE DOING ANY MIGRATION ASSISTANCE? 
 
 We also propose to monitor the edge connectivity of result matrices after a computation is complete. For instance, the occurrence of a hot vertex after a graph computation step can be identified by a significant change in the row sparsity corresponding to that hot vertex. Hence, we propose to provide additional monitoring registers in the GAMA tiles to measure the sparsity changes in each row. During a matrix-matrix computation, for example, we can track the change in sparsity of each row as the computation progresses. While maintaining this information across all vertices has high performance and memory overhead, we will only maintain this information for only a few vertices per each corelet as an approximation. Significant change in sparsity can be used to determine the work distribution  across GAMA tiles in the next iteration of a graph algorithm.    
 
