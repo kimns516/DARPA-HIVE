@@ -5,7 +5,7 @@ The core is architected to provide 16GOPs at 34mW and the estimated area is 0.5m
 We will first describe the microarchitecture of the GAMA core, and then describe the overall architecture of the GAMA accelerator.
 
 
-It has been shown that a wide range of graph algorithms can be implemented by a general case of matrix multiply \textbf{C} = \textbf{A} \textit{f}().\textit{g}() \textbf{B}. 
+It has been shown that a wide range of graph algorithms can be implemented by a general case of matrix multiply \textbf{C} = \textbf{A} \textit{f}().\textit{g}() \textbf{B}~\cite{graph:primitives}. 
 For example, a matrix-vector multiply (i.e., \textbf{C} = \textbf{A} +.$\times$ \textbf{B}) represents an one-hop BFS 
 where \textbf{A} is a $N \times N$ connectivity matrix, \textbf{B} is a $1 \times N$ vector of the starting node, 
 \textit{g}($i$, $j$) returns $a_{i,j} \times b_{j}$ and \textit{f}($i$) returns $\sum_{j=1}^{N}$ \textit{g}($i$,$j$).
