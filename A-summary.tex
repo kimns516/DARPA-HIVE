@@ -14,7 +14,7 @@ for designing an efficient graph analytic processor.
 In this project, we aim to deliver 1000$\times$ higher system performance than the state-of-the-art GPU operating on sparse matrices.
 Toward the goal, we propose to build the GAMA (Graph Acceleration through Matrix Abstraction) system to tackle critical graph processing challenges. 
 The GAMA tile is a novel processing-in-memory architecture where a matrix computation accelerator is 2.5D-stacked with 4$\times$8GB DiRAM4 dies.
-The accelerator is composed multiple GAMA corelets, where each corelet is configured as an 8-lane SIMD engine customized for matrix operations. Each corelet 
+The accelerator is composed multiple GAMA cores, where each core is configured as an 8-lane SIMD engine customized for matrix operations. Each core 
 is provisioned with an L1 and a shared eDRAM L2 \emph{elastic caches} that support variable width cache lines.  
 The elastic cache design exploits the unique properties of DiRAM4 which supports many more narrow width memory channels than traditional high bandwidth memory.
 This memory sub-system will efficiently support both sparse/random and dense/sequential memory accesses for efficient matrix operations. 
