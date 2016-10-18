@@ -1,0 +1,84 @@
+%1. A general description of the objective (for each defined task/activity);
+%2. A detailed description of the approach to be taken to accomplish each defined task/activity;
+%3. Identification of the primary organization responsible for task execution (prime, sub, team member, by name, etc.);
+%4. The completion criteria for each task/activity - a product, event or milestone that defines its completion.
+%5. Define all deliverables (reporting, data, reports, software, etc.) to be provided to the Government in support of the proposed research tasks/activities; AND
+%6. Clearly identify any tasks/subtasks (prime or subcontracted) that will be accomplished on-campus at a university.
+\noindent
+
+\subsection{Phase 1}
+\noindent
+\textbf{(Task-1) ISA definition of the GAMA corelet} 
+ Annavaram  will define a subset of the processor's instruction set dealing with computational aspects of matrix operations. Annavaram with them implement the functional simulator of the corelet in software to implement these instructions.
+This task is completed when the functional simulator can run test code and deliver the following items: 
+(1) the completed software code for the functional simulator of computational aspects with the test code; and (2) technical documents depicting the computational components of the instruction set, architecture diagrams, and simulator implementation with the simulator usage.
+
+
+\vspace{3pt}
+\noindent
+\textbf{Model (Task-2) GAMA corelet's processing pipeline}
+Annavaram will model the detailed microarchitecture and performance of GAMA corelet pipeline, which includes (1) Coarse-grain reconfigurable execution pipeline and (2) Elastic cache design private to each corelet; (2) Elastic eDRAM cache shared by all corelets; 
+The task is completed, when the software code from the tasks can successfully run test code derived from given benchmarks; provide performance in terms of cycles; and deliver the following items:
+(1) the completed performance modeling of corelet software; and (2) technical documents depicting microarchitecture diagrams and performance simulator implementation with the simulator usage.
+
+\vspace{3pt}
+\noindent
+\textbf{(Task-7) Microarchitecture Simulator of GAMA system scaled to 16 GAMA tiles.}
+ Annavaram will integrate processor model into a larger simulation infrastructure to create an entire GAMA tile and measure its performance in software. He will then integrate computational components from 16 tiles to create the GAMA system simulator. 
+This task is completed when we the performance simulator can successfully run test code and  provide performance in terms of simulated cycles. 16 tiles will be simulated as a GAMA system. We will deliver the following items:
+(1) the completed performance simulator software code with the test code; and (2) technical documents depicting architecture diagrams and performance simulator implementation with the simulator usage.
+
+
+\subsection{Phase 2}
+%- (X) Implement and refine chip architecture (based on TA2 feedback from simulator) to address current memory bottlenecks for sparse data acceleration of graph primitives
+%- (X) Update dataflow model / architecture scalable to a 16 nodes with anticipated performance numbers
+%- (X) Develop system level scaling model including electrical, mechanical, and thermal needs
+%
+%-Output:
+% (X) Updated block diagram and schematic of graph processor
+% (X) PCB/FPGA prototype of chip and performance results on graph benchmarks /primitives (for TA2 to use for toolkit development)
+% (X) GDS2 file in preparation for fabrication
+
+\vspace{3pt}
+\noindent
+\textbf{Implement (Task-8) GAMA corelet pipeline, and (Task-11) GAMA tile integration.}
+ Annavaram will perform the RTL designs of the processing pipeline in Verilog HDL; synthesize the RTL designs to generate gate-level netlists; and test the synthesized netlists using a gate-level simulator and a DNVUF2\_HPC\_PCIE FPGA development board.  The RTL design will be integrated into the entire proposed accelerator module in Task 11. 
+These tasks are completed when the synthesized netlists can successfuly run the test code on a DNVUF2\_HPC\_PCIE FPGA development board, and deliver the following items:
+(1) the completed Verilog HDL code with synthesized gate-level netlists, synthesis scripts, and simulation scripts for each task; and 
+(2) technical document describing the RTL design and expected operating frequency of the accelerator module in the target 28nm technology.
+
+
+\vspace{3pt}
+\noindent
+\textbf{(Task-12) Iterative refinement of GAMA tile design.} 
+ Annavaram will refine the processor pipeline architecture of the accelerator module, the microarchitectures of the accelerator and its sub-systems, and the RTL designs, after analyzing the performance of the accelerator module with the architectural simulator refined by the synthesis results.
+This task is completed when the architecture and microarchitectures are improved based on the simulations using the architectural simulator of the corelet pipeline; 
+the RTL designs are updated accordingly; and 
+deliver the following items:
+(1) the refined RTL designs, synthesized gate-level netlists, and synthesis scripts; 
+(2) the enhanced architectural simulator software code; and
+(3) technical document describing the enhanced architecture and microarchitectures with updated performance projections.
+
+\vspace{3pt}
+\noindent
+\textbf{(Task-17) FPGA Prototype of GAMA tile}
+ Annavaram will prototype a single acclerator module's processor pipeline using DNVUF2\_HPC\_PCIE boards that can be connected to a host system through the PCIe interface.
+This task is completed when the host system supplies the benchmark code and its input data, run the code with the input data on DNVUF2\_HPC\_PCIE FPGA development boards prototyping the accelerator module, and deliver the following items:
+(1) the completed Verilog HDL code and scripts used for prototyping the accelerator module,  
+(2) technical document describing the prototyped implementation and projected performance results in the target 28nm technology.
+
+\subsection{Phase 3}
+%-Bring up and test chip fab
+%-Identify any bugs that can be worked around with software
+%-Identify any bugs which require a chip re-spin
+%-Build and test system at scale (16 nodes)
+%-Output: Deliver test board with silicon and scale system (16 nodes) to TA3 for testing of toolkits
+
+\vspace{3pt}
+\noindent
+\textbf{(Task-20) Build and bring up the GAMA system.}
+Annavaram will put together the processor chips into the whole system by integrating the accelerator system into PCB, and IBM P8 system.
+This task is completed when the full accelerator system runs the test code, and deliver the full accelerator system.
+
+
+
