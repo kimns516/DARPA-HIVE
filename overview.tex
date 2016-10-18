@@ -4,7 +4,7 @@ Given the vast size of these graphs with billions of vertices and even more edge
 In this proposal we treat graph algorithms as linear algebraic problem formulations, where graphs are represented as adjacency matrices.  
 The evolving duality between graph algorithms and their equivalent matrix operations forms a solid basis for 
 designing computing systems %that can efficiently manipulate matrix operations.  
-for efficient graph processing.
+for efficient graph processing~\cite{graph:primitives}.
 For example, there are well known linear algebraic problem formulations for graph algorithms such as breadth first search, strongly connected components, shortest path, stress centrality, betweenness centrality, sub-graph detection and so on~\cite{kepner2011graph}.  
 These algorithms demand a diverse range of matrix operations, including matrix multiplication, Kronecker product,  matrix decomposition, inner and outer products, matrix inversion, matrix transpose and Eigen value computation.  
 Supporting such a broad range of operations on extremely large matrices is the first challenge that will be tackled in this proposal. 
