@@ -1,52 +1,75 @@
 \noindent
 The basic building block of the GAMA accelerator (Fig.~\ref{fig:arch}(b)) is the GAMA core,
-a RISC-V processor  tightly coupled with an 8-lane acceleration engine to efficiently accelerate sparse matrix operations (Fig.~\ref{fig:arch}(c)).
+a RISC-V processor  tightly coupled with an 8-lane compute engine to efficiently accelerate sparse matrix operations (Fig.~\ref{fig:arch}(c)).
 The core is architected to provide 16GOPs at 34mW and the estimated area is 0.5mm$^2$.
 We will first describe the microarchitecture of the GAMA core, and then describe the overall architecture of the GAMA accelerator.
 
 
-It has been shown that a wide range of graph algorithms can be implemented by a general case of matrix multiply \textbf{C} = \textbf{A} \textit{f}().\textit{g}() \textbf{B} 
+It has been shown that a wide range of graph algorithms can be implemented by a general case of matrix multiply \textbf{C} = \textbf{A} \textit{f}().\textit{g}() \textbf{B}. 
 For example, a matrix-vector multiply (i.e., \textbf{C} = \textbf{A} +.$\times$ \textbf{B}) represents an one-hop BFS 
 where \textbf{A} is a $N \times N$ connectivity matrix, \textbf{B} is a $1 \times N$ vector of the starting node, 
 \textit{g}($i$, $j$) returns $a_{i,j} \times b_{j}$ and \textit{f}($i$) returns $\sum_{j=1}^{N}$ \textit{g}($i$,$j$).
 
 
-As large graphs are often represented by very sparse matrices, compressed formats, such as dual compressed sparse row and sparse column (DCSR  and DCSC) formats, are widely used to efficiently store the matrices in terms of storage size.
-However, storage compaction complicates matrix operations and requires random/irregular memory accesses especially for constructing matrix \textbf{C} in a compressed format on the fly (i.e., merging operations).
+As large graphs are often represented by very sparse matrices, compressed formats, such as double compressed sparse row and sparse column (DCSR  and DCSC) formats, are widely used to efficiently store the matrices in terms of storage size.
+However, the storage compaction complicates matrix operations and requires random/irregular memory accesses especially for constructing matrix \textbf{C} in a compressed format on the fly (i.e., merging operations).
 After carefully analyzing the state-of-the-art DCSC and DCSR formats and matrix multiplication algorithms based on these formats, 
 we propose the GAMA core microarchitecture depicted in Fig.~\ref{fig:arch}(c). The GAMA avoids storing \textbf{A} and \textbf{B} in multiple formats, which often simplifies the accesses of  non-zero values (NZVs) for matrix operations.
-Our microarchitecture can handle both row- and colum-major formats, but for discussion clarity here let us assume  \textbf{A} and \textbf{B} are stored in DCSC or similar column-major format.
+Our microarchitecture can handle both row- and colum-major formats, but for discussion clarity here let us assume  \textbf{A} and \textbf{B} are stored in DCSC or a similar column-major format.
 In such a format, NZVs in a given column are already sorted in row order and stored in an array structure sequentially. 
 To stage NZVs with their row indices from both \textbf{A} and \textbf{B} for parallel operations, we propose A- and B-column buffers. 
-Each buffer consists of one or more 64-byte entries, each of which can be loaded by one special load instruction (\texttt{LD64B}) that we will implement as an extended RISC-V ISA. 
+
+A buffer can consist of one or more 64-byte entries, each of which can be loaded by one special load instruction (\texttt{LD64B}) that we will implement as an extended RISC-V ISA. 
 Note that \texttt{LD64B} will bypass L1D cache and directly access the GAMA main memory.
-Each buffer has entries, and each entry stores a two tuple, the numerical value of the matrix element, and the corresponding row index. Each buffer is associated only with a single column and hence we store the column index of 
-all the 8 buffer entries in a register in the RISC-V processor. 
+Each buffer entry stores 8 pairs of a numerical value and its row index from a column of a matrix (Fig.~\ref{fig:arch}(c)), and
+we store the associated column address for all 8 pairs in a register in the RISC-V processor.
+%the number of NZVs in a column is much larger than that of 8 in an acceleration engine in large matrices of project's interest, and thus
+%Each buffer has entries, and each entry stores a two tuple, the numerical value of the matrix element, and the corresponding row index. 
+%Each entry store 8 pairs of row index and NZV for a column,
+%and we store the column index of all the 8 pairs in a register in the RISC-V processor,
+%Note that each buffer entry is associated only with a single column, 
+%as the number of NZVs in a column is still much larger than that of 8 in an acceleration engine in large matrices of project's interest.
+%and thus the corresponding column address for all 8 pairs is stored in the register file of the RISC-V processor.
 
-%we assume that the number of NZVs in a column is still much larger than that of 8 in an acceleration engine in large matrices of project's interest, and thus the corresponding column address for all 8 pairs is stored in the register file of the RISC-V processor.
 
-
-Consider the  ``B-column buffer'' in Fig.~\ref{fig:arch}(c). The row index determines which row that given value is associated with. Let us assume that the column index of this buffer is one.  We now need to find the matrix value in the corresponding column index of  \textbf{A} for performing a matrix multiplication.  For a given column, the column-major sparse matrix format allows us to easily retrieve the starting address and the number of NZVs sequentially stored in the array. 
+Consider ``B-column buffer'' in Fig.~\ref{fig:arch}(c). 
+The row index in each pair determines the column index of \textbf{A}. % stored in DCSC or a similar column-major format.
+%The row index determines which column in \textbf{A} is associated with the given value. 
+%Let us assume that the row index of this buffer is one. 
+Let us assume that the row index of the first (bottom most) pair in B-column buffer is ``1,'' as depicted in Fig.~\ref{fig:arch}.
+We now need to find the values of the corresponding column index of \textbf{A} to perform multiplications.  
+For a given column, the column-major sparse matrix format allows us to easily retrieve the starting address and the number of NZVs sequentially stored in the array. 
 After the processor determines the starting address and the number of NZVs of the corresponding column, 
 it also loads 8 pairs of a value and its row index in an entry of ``A-column buffer'' by executing a \texttt{LD64B}.
 
 
-As depicted, there are 8 ALUs for \textit{g}(), and the value in the first entry of the B-column buffer (corresponding to the bottom most entry in the Fig.~\ref{fig:arch}(c))  is broadcast to all 8 ALUs as one of the operands in each ALU.
+As depicted in Fig.~\ref{fig:arch}(c), there are 8 ALUs for \textit{g}(), and the value in the bottom-most (first) pair in the B-column buffer 
+%(corresponding to the bottom most entry in the )  
+is broadcast to all 8 ALUs as one of the operands for each ALU.
 The 8 values in the first entry of the A-column buffer are fed to the 8 ALUs as the other operand for each ALU.
-We will use ALUs supporting single-precision floating-point multiply-add operations for weighted edge graphs. We plan to optimize the \textit{g}() function circuit design to account for graphs with non-weighted edged (1 implies an edge and 0 implies no edge). For non-weighted edge graphs we expect to derive a significant power savings by optimizing the multiplication with 1 and 0 values.     
+We will use ALUs supporting single-precision floating-point multiply-add operations for weighted edge graphs. 
+We plan to optimize the \textit{g}() function circuit design to account for graphs with non-weighted edged (1 implies an edge and 0 implies no edge). 
+For non-weighted edge graphs we expect to derive a significant power reduction by optimizing the multiplication with 1 and 0 values, 
+allowing the GAMA accelerator to operate at higher frequency under the power contraint.     
  
 %However, all the NZVs will be ``1'' and a multiplication can be replaced with a ``AND'' operation for graph traversing problems. In such a case, we propose to power-gate the floating-point unit in the ALU and run the core at higher frequency than 2GHz, as AND operations consume much less power than floating-point operations and less contrained by power and thermal issues. 
 
 
 The 8 computed results with the corresponding 8 row indices from the first entry of A-column buffer will be applied to 
-the ``parallel memory access unit'' in Fig.~\ref{fig:arch}(c) with the column index of values in B-column buffer and the starting address of the heap associated with the column index of B-column buffer.
-The heap is used to construct $c_{i,k} in $\textbf{C} from individual $a_{i,j} \times b_{j,k}$ (i.e., merging operations)~\cite{buluc:ipdps:2015}. 
-As the access pattern of the heap is very random, these 8 values with random addresses will be stored to our elastic L1D cache (cf. Sec.~\ref{sec:memory:on-chip}) with 8 banks to support 8 concurrent accesses to 8 different random addresses.
+the ``parallel memory access unit'' in Fig.~\ref{fig:arch}(c) with the column address of values in a processor register and the starting address of the heap associated with the column index of B-column buffer.
+The heap is used to construct $c_{i,k} in $\textbf{C} from $a_{i,j} \times b_{j,k}$ for a range of $j$ (i.e., merging operations)~\cite{buluc:ipdps:2015}. 
+As the access pattern of the heap is very random, these 8 values with random addresses will be stored to and retrieved from our elastic L1D cache (cf. Sec.~\ref{sec:memory:on-chip}) with 8 banks to support 8 concurrent accesses to 8 different random addresses.
 Moreover, we will use the ALUs to support three-operand computations such as multiply-add to efficiently support the accumulation of values computed by 8 values to the corresponding values of \textbf{C} stored in the heap.
 
+
 After all the NZVs of column ``1'' of \textbf{A} is consumed in Fig.~\ref{fig:arch}(c), 
-the B-column buffer acting like a FIFO buffer makes the second entry the first one, and the processor brings the values and row indices of column ``11'' of \textbf{A} (the second  from bottom entry in the Fig.~\ref{fig:arch}(c) of B-column buffer). 
-While the computation with one row index entry of a B-column buffer progresses, the row indices stored in B-column buffer will be used for prefetching NZVs and the corresponding row indices of the next columns of \textbf{A} to A-column buffer.
+the head pointer of the B-column buffer operating as a FIFO buffer points to the second pair.
+%makes the second pair from the bottom most one as the first pair, 
+In Fig.~\ref{fig:arch}(c), the row index of the second pair is ``11,'' 
+and thus the processor brings the values and their row indices of column ``11'' of \textbf{A}. 
+%While the computation with one row index entry of a B-column buffer progresses, 
+While the computation associated with one row index of B-column buffer progresses, 
+the subsequent row indices stored in B-column buffer will be used for prefetching the values and corresponding row indices of the next columns of \textbf{A} to A-column buffer.
 
 
 The RISC-V processor has 4KB IL1 and 32KB 8-bank DL1 caches.
@@ -61,7 +84,7 @@ controlling the data-flow of the acceleration engine for merging operations for 
 %For efficient execution of complex \textbf{g}() and \textbf{f}(), we propose to use 
 
 The architecture of a GAMA accelerator is composed of four MIMD clusters, and the cluster architecture is depicted in Figure~\ref{fig:arch}(b).
-The four cluster consists of a total of 16 cores operating at 2GHz and connected to a special 512KB eDRAM-based L2 cache (cf. Sec.~\ref{sec:memory:on-chip}) and a 16GBps on-chip interconnect between them. 
+The four cluster consists of a total of 16 cores operating at 2GHz or higher and connected to a special 512KB eDRAM-based L2 cache (cf. Sec.~\ref{sec:memory:on-chip}) and a 16GBps on-chip interconnect between them. 
 An eDRAM L2 cache can be connected to one of 16 DiRAM4 memory controllers, each of which is connected to a 64-bit (16GBps) DiRAM4 memory channel, through switches.
 Moreover, a core can send a memory request to a port of the OpenCAPI link consisting of 16 ports and providing 256GBps aggregate bandwidth, as well as network on-chip (NOC) interconnects to three other clusters.  
 %which are connected to each other through on-chip network.
