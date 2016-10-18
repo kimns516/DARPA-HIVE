@@ -38,9 +38,9 @@ We will use ALUs supporting single-precision floating-point multiply-add operati
 %However, all the NZVs will be ``1'' and a multiplication can be replaced with a ``AND'' operation for graph traversing problems. In such a case, we propose to power-gate the floating-point unit in the ALU and run the core at higher frequency than 2GHz, as AND operations consume much less power than floating-point operations and less contrained by power and thermal issues. 
 
 
-The 8 computed results with the corresponding 8 row indices from the first entry of A-column buffer will be applied to  the ``parallel memory access unit'',
-the column index of values in B-column buffer, and the starting address of the heap associated with the column index of B-column buffer.
-The heap is used to construct \textbf{C} (cf. A. Buluc, et al., ``On the Representation and Multiplication of Hypersparse Matrices,'' IPDPS, 2008)
+The 8 computed results with the corresponding 8 row indices from the first entry of A-column buffer will be applied to 
+the ``parallel memory access unit'' in Fig.~\ref{fig:arch}(c) with the column index of values in B-column buffer and the starting address of the heap associated with the column index of B-column buffer.
+The heap is used to construct $c_{i,k} in $\textbf{C} from individual $a_{i,j} \times b_{j,k}$ (i.e., merging operations)~\cite{buluc:ipdps:2015}. 
 As the access pattern of the heap is very random, these 8 values with random addresses will be stored to our elastic L1D cache (cf. Sec.~\ref{sec:memory:on-chip}) with 8 banks to support 8 concurrent accesses to 8 different random addresses.
 Moreover, we will use the ALUs to support three-operand computations such as multiply-add to efficiently support the accumulation of values computed by 8 values to the corresponding values of \textbf{C} stored in the heap.
 
