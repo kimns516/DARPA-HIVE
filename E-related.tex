@@ -6,9 +6,13 @@ Some accelerators are proposed to efficiently process sparse matrix operations, 
 In contrast, using the state-of-the-art, soon-to-be-released memory, we propose to jointly architect accelerator and memory sub-system architectures 
 such that the accelerator system can efficiently execute both dense and sparse matrix operations.
 
+Over/under-drives have been applied to SRAM~\cite{} and eDRAM~\cite{} to reduce read/write failure. However, The over/under-drive amounts are small (typically < 200mV) and are not applied to all peripherals. But these are different from the spatio-temporal boosting technique in this proposal which aims to reduce access latency. Little prior work has explored such techniques, especially for eDRAM due to its sensitive failure mechanism. 
+
+\begin{comment}
 Various spatio-temporal voltage boosting techniques have been applied to SRAM to reduce read/write failure of SRAM arrays at low voltage~\cite{}, 
 while the failure mechanism of eDRAM arrays singificantly differs from that of SRAM arrays.
 That is, such voltage boosting techniques have never been applied to eDRAM arrays especially to reduce the access latency.
+\end{comment}
 
 In improving link power efficiency, dynamic power management techniques (e.g., \cite{anand:jssc:2015} cannot be used to improve power efficiency, because the GAMA tiles are going to be designed to minimize processor idle time. 
 Instead, the techniques that improve power efficiency at a peak data rate as Sec.~\ref{sec:scale:link} are needed.
