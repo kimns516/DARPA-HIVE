@@ -17,12 +17,12 @@
 %%% of whether the dataset is sparse or dense.
 
 \noindent
-Our preliminary study exhibits that the memory bandwidth utilization is very low for many graph algorithms.
-This is because these algorithms often require random/sparse memory accesses, whereas the memory hierarchy is optimized only for sequential/dense memory accesses.
-The study also shows that we must re-design the entire memory hierarchy if we are going to effectively support both random/sparse and sequential/dense memory accesses.
+Our preliminary study~\cite{Xu2014, luo2010effective, kim2015compiler, kim2015locality} show that the memory bandwidth utilization is very low for many graph algorithms.
+Graph algorithms often require random/sparse memory accesses, whereas the memory hierarchy is optimized only for sequential/dense memory accesses.
+We must re-design the entire memory hierarchy to effectively support both random/sparse and sequential/dense memory accesses.
 That is, optimizing either on-chip caches or off-chip memory alone is ineffective.
 Thus, we propose to architect the GAMA memory system, consisting of (1) a private L1 cache for each GAMA core; (2) shared spatially-temporally boosted eDRAM L2 caches across all the cores within a GAMA tile; and (3) 32GB of DiRAM4 with a custom memory controller, to efficiently support random/sparse and sequential/dense memory accesses.
-More specifically, it will be built on circuit/architecture techniques and a soon-to-be-released DRAM technology and achieve the target 90\% utilization of memory bandwidth. 
+More specifically, it will be built on circuit/architecture techniques and a soon-to-be-released DRAM technology and will achieve the target 90\% utilization of memory bandwidth. 
 
 
 \subsubsection{On-Chip Cache Architecture} 
@@ -30,19 +30,19 @@ More specifically, it will be built on circuit/architecture techniques and a soo
 \noindent
 \textbf{L1 cache.}
 We propose elastic cache architecture to efficiently support both narrow- and wide-width memory accesses from multiple non-contiguous memory locations to co-reside in a single 64-byte cache line. 
-Specifically, we introduce a concept of chunk tags to store tags for narrow-width data blocks (e.g., 4-, 8-, or 16-byte byte blocks) along with a conventional tag (referred to as common tag) for each 64-byte cache line (see Fig.~\ref{fig:elastic-cache}). 
-Chunk tags add only a small storage overhead. 
+Specifically, we introduce a concept of chunk tags to store tags for narrow-width data blocks (e.g., 4-, 8-, or 16-byte byte blocks) along with a conventional tag (referred to as common tag) for each 64-byte cache line (see Fig.~\ref{fig:elastic-cache}(a) fror how the chunk and common tags are architected).  Chunk tags add only a small storage overhead. 
 Elastic cache allows us to efficiently use cache lines for storing narrow-width data blocks from non-contiguous addresses (i.e. the heap memory accesses to construct \textbf{C} on the fly, 
 which may be seen in sparse matrices, as well as a 64-byte contiguous blocks that may be seen in dense matrices without significant cache reorganization. 
 Note that just adopting narrow cache lines is not efficient to handle sequential memory requests for dense datasets according to our experiments.
-Our preliminary study shows this architecture applied to L1 caches of a traditional GPU architecture improve the performance by more than 2$\times$ for SPMV.
-We expect that the performance can much further improved when the architecture is also applied to large L2 cache.
+Our preliminary study shows this architecture applied to L1 caches alone in  a traditional GPU architecture improves the performance by more than 2$\times$ for SPMV (sparse matrix-vector muliply).
+We expect that the performance can be further improved when the architecture is also applied to large L2 cache.
 
 
 %Note that just adopting narrow cache lines is not efficient to handle sequential memory requests for dense datasets according to our experiments.
 %Figure~\ref{fig:elastic-cache-flow} describes the access flow of the proposed \texttt{Elastic-Cache}. 
 %Note that we will employ the proposed \texttt{Elastic-Cache} architecture for both private SRAM-based L1 and shared eDRAM-based L2 caches.
 
+\begin{comment}
 \begin{wrapfigure}{r}[0pt]{0.4\textwidth}
 \center
 \includegraphics[width=1.0\linewidth]{./fig/chunk_tag_16bit-eps-converted-to.pdf}
@@ -50,6 +50,7 @@ We expect that the performance can much further improved when the architecture i
 \caption{The chunk and common tags to support elastic cache accesses for a 4-way 16KB cache.}
 \label{fig:elastic-cache}
 \end{wrapfigure}
+\end{comment}
 
 
 Considering our core architecture with a 8-lane engine (cf. Sec.~\ref{sec:processing}), 
@@ -57,6 +58,17 @@ we will architect the elastic L1 cache with 8 banks.
 Each bank is a 4KB direct-map cache with 4 victim entries and provides 8 bytes per cycle (i.e., total 64 bytes per cycle).
 This architecture is preferrable, as the 8-lane SIMD engine with the address generation logic in Fig.~\ref{fig:arch}(c) can simultaneously request 8 memory accesses to different addresses for the heap memory accesses.
 %The connection between an elastic L1 cache and a corelet is described in Section~\ref{sec:processing}.
+
+\begin{figure}
+\center
+\includegraphics[width=0.3\linewidth]{./fig/chunk_tag_16bit-eps-converted-to.pdf}
+\includegraphics[width=0.2\linewidth]{./fig/boosting.pdf}
+%\caption{The chunk and common tags to support both narrow- and wide-width on-chip cache accesses for a 4-way 16KB cache.}
+\caption{(a)Elastic cache: chunk and common tag architecture (b) Boosting scheme for 3T eDRAM bitcells}
+\label{fig:elastic-cache}
+\end{figure}
+
+\begin{comment}
 \begin{wrapfigure}{r}[0pt]{0.35\textwidth}
 \center
 \includegraphics[width=2.4in, trim=20 20 10 50]{./fig/boosting.pdf}
@@ -64,6 +76,7 @@ This architecture is preferrable, as the 8-lane SIMD engine with the address gen
 %Red dashed outlines highlight the portions receiving boosting/underdriving. It is critical to protect dynamic nodes from coupling noises of boosting via parasitic capacitors (gray).}
 \label{fig:boosting}
 \end{wrapfigure}
+\end{comment}
 
 %\vspace{3pt}
 \noindent
@@ -75,7 +88,7 @@ In implementing eDRAM cache, we aim to overcome relatively long latency of acces
 %In this project, %building upon our recent work on low-energy and compact memory-based FFT core\footnote{ISSCC'17 submitted}, 
 We will apply a dynamic fine-grained spatial-temporal voltage boosting technique only on the peripheral circuits (address decoders, multiplexers/demultiplexers, and interconnect buffers), but not bitcells. 
 This boosting technique is synergistic with the elastic cache architecture and beneficial for graph algorithms that often need to access a small subset of a large cache line without dissipating excessive power. 
-We will explore voltage boosting in a temporarily and spatially fine-grained fashion for improving access latency and throughput (cf. Fig.~\ref{fig:boosting}). 
+We will explore voltage boosting in a temporarily and spatially fine-grained fashion for improving access latency and throughput (cf. Fig.~\ref{fig:elastic-cache}(b)). 
 We will also effectively gate or use low supply voltage (e.g., 0.6V or lower) for the circuits that are not involved in accessing the demand data, making them serve as thermal buffers. 
 %This way, we expect to significantly improve latency still under the thermal limit. 
 Assuming 0.5V threshold voltage ($V_T$), 
@@ -84,7 +97,7 @@ boosting from 0.8V to 1.4V can increase the overdrive level ($V_{DD}$-$V_T$) fro
 %The low $V_{DD}$ used in the rest of cache circuits can save a significant amount of leakage energy dissipation. 
 By exploiting this latency improvement, we will explore to make the cache systems to perform multiple fine-grained data accesses (in serial by default but in parallel if data are in the multiple banks) and pack and send them back to the pipeline of a core. 
 To enable such voltage boosting in a short time period without exceeding the power/thermal limit, 
-we will also adopt innovative circuit techniques.
+we will explore circuit innovations from our own prior works~\cite{yang2015compact,  Doyun2017, kim2014analysis}, such as precise thermal monitoring to stop voltage overdrive that may occur with higher temperature, and sub-cycle voltage boosting through decoupling capacitor design and in-situ error monitoring.
 
 
 \begin{comment}
@@ -153,7 +166,7 @@ This allows the front-end memory queue buffers requests and extracts more spatia
 The GAMA system will adopt a distributed shared memory model with non-uniform memory access latency. 
 Hence, all the 16 GAMA tiles will share the address space. 
 The programer uses the OpenCAPI protocol to launch a sparse matrix operation on the GAMA accelerator. 
-OpenCAPI removes the overhead and complexity of sharing the main memory and maintaining cache coherence amongst host CPUs and accelerators.
+OpenCAPI reduces the overhead and complexity of sharing the main memory and maintaining cache coherence amongst host CPUs and accelerators.
 Specifically, OpenCAPI provides the libcxl library for initiating accelerator launch and memory management APIs, such as $cxl\_afu\_open\_dev$ to open the accelerator and $cxl\_afu\_attach$ to start the accelerator. 
 The data for the accelerator is placed in a work element descriptor (WED) and is passed as a pointer to GAMA. 
 The accelerator and host can seamlessly share the same virtual memory space. 
@@ -164,7 +177,7 @@ The accelerator and host can seamlessly share the same virtual memory space.
 \textbf{Data placement.} 
 %Each 128MB data slice may be further interleaved in various banks and channels within each tile.  
 Given the criticality of memory latency and bandwidth to graph processing, 
-we will provide several higher-level software APIs to allow the application developer or compilers (T2 thrust) to provide semantic information about matrix representations laid out in memory. 
+we will provide several higher-level software APIs to allow the application developer or compilers (T2 thrust perfomers) to provide semantic information about matrix representations laid out in memory. 
 For instance, the programmer may explicitly tag the column pointer, row index and value vectors (for compressed column representation). 
 This information will be used by the memory system to determine how to layout these arrays (bank interleaving and distribution across memory channels) in memory and also to generate bank and channel access commands for each vector appropriately. 
 % intermediate matrices and vectors that may be generated  may also be tagged by the programmer to indicate how they are being stored (doubly compressed column or row etc.,).  %For instance, in centrality analysis using all pairs shortest paths approach the shortest paths for each pair are stored as intermediate results that will be used in the final reduction process to extract the central vertex.  Each matrix or vector's  physical address to appropriate bank and channel activation sequence.
