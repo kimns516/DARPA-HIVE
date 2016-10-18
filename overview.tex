@@ -19,8 +19,8 @@ Such disparity leads to significant load imbalances in computations.
 Efficiently handling both sparse and dense matrices with varying degrees of connectivity is the second challenge tackled in this proposal. 
 
  
-Finally, scaling the execution of linear algebraic manipulations, through parallelization, while mitigating Amdahl's bottleneck is the last challenge that this proposal tackles. 
-Parallel execution of matrix operations can be mapped to various distributed computing paradigms, such as Spark, Pregel and Parallel-R. 
+Finally, scaling the execution of linear algebraic manipulations, through parallelization, while mitigating Amdahl's bottleneck is another challenge that this proposal tackles. 
+Parallel execution of matrix operations can be mapped to various distributed computing paradigms, such as Spark~\cite{zaharia2010spark, MapReduce}, Pregel~\cite{pregel, Giraph} and Parallel-R~\cite{kabacoff2015r}. 
 For instance, many PGAS (partitioned global address space) approaches distribute equal number of vertices across nodes (equal number of rows from the adjacency matrix). 
 However, when vertex degrees exhibit power law distribution, it is extremely difficult to balance the load across computational nodes. 
 Launching a new iteration of the computation requires the previous iteration to complete, thereby forcing a barrier synchronization across various threads. 
@@ -28,12 +28,12 @@ In the presence of load imbalances such synchronizations curtail scaling.
 
 
 These observations lead to the main research thrusts of this proposal, as described below. 
-To guide the discussion of the proposed research, we present an overview of the system architecture that we will design and build. 
+To guide the discussion of the proposed research, we pfirst resent an overview of the system architecture that we will design and build. 
 The system will rely on processing-in-memory architecture, but appropriately adapted for sparse matrix manipulations for graph processing. 
 Fig.~\ref{fig:arch}(a) presents the overview of the GAMA (graph acceleration through matrix abstraction) system consisting of 16 GAMA tiles and host systems connected by power-efficient inter-chip OpenCAPI links.
-A GAMA tile consists of a many-core accelerator, four 8GB high-bandwidth memory dies (DiRAM4) with 64$\times$64-bit memory channels, 
+A GAMA tile consists of a many-core GAMA accelerator, four 8GB high-bandwidth memory dies (DiRAM4) with 64$\times$64-bit memory channels, 
 and four OpenCAPI links with aggregate memory bandwidth of 1TBps to four other GAMA tiles or a host system.
-Subsequently, we will describe the detail of the accelerator (cf. Sec.~\ref{sec:processing}) and memory sub-system (cf. Sec.~\ref{sec:memory}) architectures with architecture and circuit support for efficient inter-time communications and thus strong scaling over 16 GAMA tiles (cf. Sec.~\ref{sec:scale}).
+Subsequently, we will describe the detail of the accelerator (cf. Sec.~\ref{sec:processing}),  memory sub-system (cf. Sec.~\ref{sec:memory}), and circuit support for efficient inter-tile communication and strong scaling over 16 GAMA tiles (cf. Sec.~\ref{sec:scale}).
 
 
 \begin{figure}
