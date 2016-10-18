@@ -14,7 +14,7 @@ where \textbf{A} is a $N \times N$ connectivity matrix, \textbf{B} is a $1 \time
 As large graphs are often represented by very sparse matrices, compressed formats, such as double compressed sparse row and sparse column (DCSR  and DCSC) formats, are widely used to efficiently store the matrices in terms of storage size.
 However, the storage compaction complicates matrix operations and requires random/irregular memory accesses especially for constructing matrix \textbf{C} in a compressed format on the fly (i.e., merging operations).
 After carefully analyzing the state-of-the-art DCSC and DCSR formats and matrix multiplication algorithms based on these formats, 
-we propose the GAMA core microarchitecture depicted in Fig.~\ref{fig:arch}(c). The GAMA avoids storing \textbf{A} and \textbf{B} in multiple formats, which often simplifies the accesses of  non-zero values (NZVs) for matrix operations.
+we propose the GAMA core microarchitecture depicted in Fig.~\ref{fig:arch}(c). The GAMA core avoids storing \textbf{A} and \textbf{B} in multiple formats, which often simplifies the accesses of  non-zero values (NZVs) for matrix operations.
 Our microarchitecture can handle both row- and colum-major formats, but for discussion clarity here let us assume  \textbf{A} and \textbf{B} are stored in DCSC or a similar column-major format.
 In such a format, NZVs in a given column are already sorted in row order and stored in an array structure sequentially. 
 To stage NZVs with their row indices from both \textbf{A} and \textbf{B} for parallel operations, we propose A- and B-column buffers. 
@@ -22,7 +22,7 @@ To stage NZVs with their row indices from both \textbf{A} and \textbf{B} for par
 A buffer can consist of one or more 64-byte entries, each of which can be loaded by one special load instruction (\texttt{LD64B}) that we will implement as an extended RISC-V ISA. 
 In Fig.~\ref{fig:arch}(c) A-column buffer has 8 entries, whereas and B-column buffer has one entry.
 Note that \texttt{LD64B} will bypass L1D cache and directly access the GAMA main memory, as these buffers serve as cache for values and their row indices of \textbf{A} and \textbf{B}.
-Each buffer entry stores 8 pairs of a value and its row index from a column of a matrix (Fig.~\ref{fig:arch}(c)), and
+Each buffer entry stores 8 pairs of a value and its row index from a column of a matrix, and
 we store the memory address associated with the column index of all 8 pairs in a register in the RISC-V processor.
 %the number of NZVs in a column is much larger than that of 8 in an acceleration engine in large matrices of project's interest, and thus
 %Each buffer has entries, and each entry stores a two tuple, the numerical value of the matrix element, and the corresponding row index. 
@@ -36,7 +36,7 @@ we store the memory address associated with the column index of all 8 pairs in a
 Consider ``B-column buffer'' in Fig.~\ref{fig:arch}(c). 
 %The row index determines which column in \textbf{A} is associated with the given value. 
 %Let us assume that the row index of this buffer is one. 
-Let us assume that the row index of the first (bottom most) pair in B-column buffer is ``1'' (Fig.~\ref{fig:arch}(c)).
+Let us assume that the row index of the first (bottom most) pair in B-column buffer is ``1''.
 The row index of \textbf{B} determines the column index of \textbf{A} for multiplications. % stored in DCSC or a similar column-major format.
 We now need to find the values of the corresponding column of \textbf{A} to perform multiplications.  
 For a given column, the column-major sparse matrix format allows us to easily retrieve the starting address and the number of NZVs sequentially stored in the array. 
