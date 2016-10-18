@@ -23,19 +23,17 @@ The second source of imbalance is the barrier synchronization that may be enforc
 For instance, well known LU decomposition algorithms iteratively compute a inverse matrix. 
 While one iteration may be executed in parallel the second iteration starts only at the end of first iteration. 
 
- 
+
+One way to detect the computational load is the number of NZVs that need to be processed in a row or column.  
+For instance, in DCSC format it is easy to detect the number of NZVs in a column.  
+The column size can be inferred from the column pointer vector.  But the number of NZVs per each column may differ significantly leading to imbalance in work. 
+We plan to augment each matrix with additional metadata bits to mark the number of non-zero elements in each column in a given matrix. 
 \begin{wrapfigure}{r}[0pt]{0.4\textwidth}
 \center
 \includegraphics[width=1.0\linewidth]{./fig/load_balance_new3.pdf}
 \caption{Uneven spoke lengths show computation imbalance severity}
 \label{fig:loadimbalance}
 \end{wrapfigure}
-
-
-One way to detect the computational load is the number of NZVs that need to be processed in a row or column.  
-For instance, in DCSC format it is easy to detect the number of NZVs in a column.  
-The column size can be inferred from the column pointer vector.  But the number of NZVs per each column may differ significantly leading to imbalance in work. 
-We plan to augment each matrix with additional metadata bits to mark the number of non-zero elements in each column in a given matrix. 
 Note that these are computed during the  initial data placement in memory or when intermediate matrices are generated. These counts are only approximate since we only plan to update them infrequently. Assuming graph structure changes slowly over time we believe these approximate counters provide good first order estimate for how much computation may be assigned to a given tile or a core within a tile. We propose to assign  cores for processing vertices in proportion to the column NZV counts. However this assignment needs to be monitored at runtime due to varying memory access delays. Even if the NVZ counts are the same a given column may be laid out in memory across tiles leading to access latency imbalance. Hence, we will monitor how different tiles and cores are  progressing to identify excessive imbalances. We will rely on a simple performance counting register that counts the number of load operations completed to monitor progress. We can also use the number of elements that were fetched in to the column buffers in each GAMA core. These counters may be accessed by the  runtime or application layer to do computation migration and dynamic load balancing. 
 
 We also propose to monitor the edge connectivity of result matrices after a computation is complete. For instance, the occurrence of a hot vertex after a graph computation step can be identified by a significant change in the sparsity corresponding to that hot vertex. Hence, we propose to provide additional monitoring registers in the GAMA tiles to measure the sparsity changes in each column. During a matrix-matrix computation, for example, we can track the change in sparsity  as the computation progresses. While maintaining this information across all vertices has high performance and memory overhead, we will only maintain this information for only a few vertices per each GAMA core as an approximation. Significant change in sparsity can be used to determine the work distribution  across GAMA tiles in the next iteration of a graph algorithm.    
