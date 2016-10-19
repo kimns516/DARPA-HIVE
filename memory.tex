@@ -19,44 +19,42 @@
 \noindent
 Our preliminary studies~\cite{Xu2014, luo2010effective, kim2015compiler, kim2015locality} show that the memory bandwidth utilization is very low for many graph algorithms.
 Graph algorithms often require random/sparse memory accesses, whereas the memory hierarchy is optimized only for sequential/dense memory accesses.
-We must re-design the entire memory hierarchy to effectively support both random/sparse and sequential/dense memory accesses.
+To that end, we must re-design the entire memory hierarchy to effectively support both random/sparse and sequential/dense memory accesses.
 That is, optimizing either on-chip caches or off-chip memory alone is ineffective.
-Thus, we propose to architect the GAMA memory system, consisting of (1) a private L1 cache for each GAMA core; (2) shared spatially-temporally boosted eDRAM L2 caches across all the cores within a GAMA tile; and (3) 32GB of DiRAM4 with a custom memory controller, to efficiently support random/sparse and sequential/dense memory accesses.
-More specifically, it will be built on circuit/architecture techniques and a soon-to-be-released DRAM technology and will achieve the target 90\% utilization of memory bandwidth. 
+Specifically, we propose the GAMA memory system consisting of: 
+(1) a private L1D cache for each GAMA core; 
+(2) shared spatially-temporally boosted eDRAM L2 caches across all the cores within a GAMA tile; and 
+(3) 32GB of DiRAM4 with a custom memory controller. 
+Building on innovative circuit/architecture techniques and a state-of-the-art DRAM technology, 
+we expect to achieve the target 90\% utilization of memory bandwidth for both random/sparse and sequential/dense memory accesses.
 
 
 \subsubsection{On-Chip Cache Architecture} 
 \label{sec:memory:on-chip}
 \noindent
 \textbf{L1 cache.}
-We propose elastic cache architecture to efficiently support both narrow- and wide-width memory accesses from multiple non-contiguous memory locations to co-reside in a single 64-byte cache line. 
-Specifically, we introduce a concept of chunk tags to store tags for narrow-width data blocks (e.g., 4-, 8-, or 16-byte byte blocks) along with a conventional tag (referred to as common tag) for each 64-byte cache line (see Fig.~\ref{fig:elastic-cache}(a) for how the chunk and common tags are architected).  Chunk tags add only a small storage overhead. 
-Elastic cache allows us to efficiently use cache lines for storing narrow-width data blocks from non-contiguous addresses (i.e. the heap memory accesses to construct \textbf{C} on the fly, 
-which may be seen in sparse matrices, as well as a 64-byte contiguous blocks that may be seen in dense matrices without significant cache reorganization. 
+We propose \textit{elastic} cache architecture to efficiently support both narrow- and wide-width memory accesses from multiple non-contiguous memory locations to co-reside in a single 64-byte cache line. 
+Specifically, we introduce a concept of ``chunk tags'' to store tags for narrow-width data blocks (e.g., 4-, 8-, or 16-byte byte blocks) along with a conventional tag (referred to as ``common tag'') for each 64-byte cache line (see Fig.~\ref{fig:elastic-cache}(a) for how the chunk and common tags are architected).  
+Chunk tags add only a small storage overhead. 
+The elastic cache facilitates efficient use of cache lines for storing 
+(1) narrow-width data blocks from non-contiguous addresses (i.e. random accesses of the heap memory to construct \textbf{C} on the fly); and
+(2) 64-byte contiguous blocks that are seen in dense matrices but too poorly placed to benefit from traditional caches. 
+
 Note that just adopting narrow cache lines is not efficient to handle sequential memory requests for dense datasets according to our experiments.
-Our preliminary study shows this architecture applied to L1 caches alone in  a traditional GPU architecture improves the performance by more than 2$\times$ for SPMV (sparse matrix-vector muliply).
-We expect that the performance can be further improved when the architecture is also applied to large L2 cache.
+Our preliminary study shows this architecture applied to L1 caches alone in a traditional GPU architecture improves the performance by more than 2$\times$ for SPMV (sparse matrix-vector muliply).
+We expect far higher performance when the elastic cache architecture is also applied to large L2 cache coupled with memory controllers architected to support both random/sparse and sequential/dense accesses.
 
 
 %Note that just adopting narrow cache lines is not efficient to handle sequential memory requests for dense datasets according to our experiments.
 %Figure~\ref{fig:elastic-cache-flow} describes the access flow of the proposed \texttt{Elastic-Cache}. 
 %Note that we will employ the proposed \texttt{Elastic-Cache} architecture for both private SRAM-based L1 and shared eDRAM-based L2 caches.
 
-\begin{comment}
-\begin{wrapfigure}{r}[0pt]{0.4\textwidth}
-\center
-\includegraphics[width=1.0\linewidth]{./fig/chunk_tag_16bit-eps-converted-to.pdf}
-%\caption{The chunk and common tags to support both narrow- and wide-width on-chip cache accesses for a 4-way 16KB cache.}
-\caption{The chunk and common tags to support elastic cache accesses for a 4-way 16KB cache.}
-\label{fig:elastic-cache}
-\end{wrapfigure}
-\end{comment}
 
-
-Considering our core architecture with a 8-lane engine (cf. Sec.~\ref{sec:processing}), 
+Considering our core architecture with a 8-lane compute engine (cf. Sec.~\ref{sec:processing}), 
 we will architect the elastic L1 cache with 8 banks. 
-Each bank is a 4KB direct-map cache with 4 victim entries and provides 8 bytes per cycle (i.e., total 64 bytes per cycle).
-This architecture is preferrable, as the 8-lane SIMD engine with the address generation logic in Fig.~\ref{fig:arch}(c) can simultaneously request 8 memory accesses to different addresses for the heap memory accesses.
+Each bank is a 4KB direct-map cache with 4 victim entries and provides 8 bytes per cycle.
+That is, all 8 banks collectively provide 64 bytes per cycle.
+This architecture is preferrable, as the 8-lane compute engine with the ``parallel memory access unit'' in Fig.~\ref{fig:arch}(c) can simultaneously request 8 memory accesses to different addresses for accessing the heap memory.
 %The connection between an elastic L1 cache and a corelet is described in Section~\ref{sec:processing}.
 
 \begin{figure}
@@ -81,23 +79,24 @@ This architecture is preferrable, as the 8-lane SIMD engine with the address gen
 %\vspace{3pt}
 \noindent
 \textbf{L2 cache.}
-The L2 cache is shared amongst 32 GAMA cores and is implemented with eDRAM and the same elastic cache architecture as L1 cache. 
-In implementing eDRAM cache, we aim to overcome relatively long latency of accessing eDRAM cache compared with SRAM cache. 
+The L2 cache is shared amongst 32 GAMA cores and is implemented with eDRAM and based on the same elastic cache architecture as L1 cache. 
+In implementing eDRAM cache, we aim to overcome relatively long latency of accessing large eDRAM cache compared with SRAM cache. 
 %minimize latency %and support \texttt{Elastic-Cache} data access. 
 %In the eDRAM based L2, it is particularly critical to 
 %In this project, %building upon our recent work on low-energy and compact memory-based FFT core\footnote{ISSCC'17 submitted}, 
-We will apply a dynamic fine-grained spatial-temporal voltage boosting technique only on the peripheral circuits (address decoders, multiplexers/demultiplexers, and interconnect buffers), but not bitcells. 
+We will apply a dynamic fine-grained spatial-temporal voltage boosting technique on the peripheral circuits (address decoders, multiplexers/demultiplexers, and interconnect buffers), but not bitcells. 
 This boosting technique is synergistic with the elastic cache architecture and beneficial for graph algorithms that often need to access a small subset of a large cache line without dissipating excessive power. 
 We will explore voltage boosting in a temporally and spatially fine-grained fashion for improving access latency and throughput (cf. Fig.~\ref{fig:elastic-cache}(b)). 
-We will also effectively gate or use low supply voltage (e.g., 0.6V or lower) for the circuits that are not involved in accessing the demand data, making them serve as thermal buffers. 
+We will also effectively gate or use low supply voltage (e.g., 0.6V or lower) for the circuits that are not involved in accessing the requested data, making them serve as thermal buffers. 
 %This way, we expect to significantly improve latency still under the thermal limit. 
 Assuming 0.5V threshold voltage ($V_T$), 
 %\footnote{High $V_T$ is common in embedded memory for suppressing leakage}
-boosting from 0.8V to 1.4V can increase the overdrive level ($V_{DD}$-$V_T$) from 0.3V to 0.9V, improving latency and throughput by at least 3$\times$. 
+boosting from 0.8V to 1.4V can increase the overdrive level ($V_{DD}$-$V_T$) from 0.3V to 0.9V, 
+improving latency and throughput by at least 3$\times$. 
 %The low $V_{DD}$ used in the rest of cache circuits can save a significant amount of leakage energy dissipation. 
-By exploiting this latency improvement, our elastic cache can perform multiple fine-grained data accesses (in serial by default but in parallel if data are in the multiple banks) and pack and send them back to the pipeline of a core. 
+By exploiting this latency improvement, our elastic cache can perform multiple fine-grained data accesses (in serial by default but in parallel if data are in the multiple banks), and pack and send them back to the pipeline of a core. 
 To enable such voltage boosting in a short time period without exceeding the power/thermal limit, 
-we will explore circuit innovations from our own prior works~\cite{yang2015compact,  Doyun2017, kim2014analysis}, such as precise thermal monitoring to stop voltage overdrive that may occur with higher temperature, and sub-cycle voltage boosting through decoupling capacitor design and in-situ error monitoring.
+we will explore circuit innovations based on our prior works~\cite{yang2015compact,  Doyun2017, kim2014analysis}, such as precise thermal monitoring to stop voltage overdrive that may occur with higher temperature, and sub-cycle voltage boosting through decoupling capacitor design and in-situ error monitoring.
 
 
 \begin{comment}
@@ -124,7 +123,7 @@ We will use  Tezzaron's DiRAM4 for the main memory of each GAMA tile.
 Each DiRAM4 die provides 8GB capacity with 64$\times$32-bit ports (total 2048 I/O pins) with 1TB/s bandwidth. 
 HBM2 is expected to provide the same bandwidth as DiRAM4, but we choose DiRAM4 because it provides narrower but more memory channels than HBM2 (16$\times$128-bit channels). 
 We believe that DiRAM is more advantageous than HBM2 for graph algorithms that generate random/sparse memory accesses. 
-Each tile integrates 4$\times$8GB DiRAM modules and thus there is a total of 4TBps internal memory bandwidth between the GAMA core and the main memory within each tile. 
+Each tile integrates 4$\times$8GB DiRAM modules and thus there is a total of 4TB/s internal memory bandwidth between the GAMA core and the main memory within each tile. 
 
 
 \vspace{3pt}
@@ -155,7 +154,7 @@ The memory controller with this proposed  memory queue may decide to delay reque
 %we expect that memory requests from different cores within each tile may exhibit spatial locality. 
 %Even sparse matrix representations will exhibit strong spatial locality across row or column values that are used in a given matrix operation.  
 %Thus the front-end memory queue buffers requests and extracts spatial locality by coalescing memory requests. 
-This intentional small queuing delay allows the front-end memory queue buffers to  extract more spatial locality by coalescing memory requests, similar to write combining buffers used in current CPUs.  
+This intentional small queuing delay allows the front-end memory queue to extract more spatial locality by coalescing memory requests, similar to write combining buffers used in current CPUs.  
 %Note that the traditional memory queues cannot be large because they rely on CAM.
 %Instead of CAM-based memory queue, we aim to architect the large memory queue using a structure like set-associative cache, where entries are indexed by memory request address ranges to confirm the full matching after comparing the tags associated with the index.
 %A list structure associated with the memory queue keeps track of valid entries in the cache-like structure based on a scheduling policy and sends the entries to the back-end memory queues associated with each DRAM bank.
@@ -171,25 +170,6 @@ Specifically, OpenCAPI provides the libcxl library for initiating accelerator la
 The data for the accelerator is placed in a work element descriptor (WED) and is passed as a pointer to GAMA. 
 The accelerator and host can seamlessly share the same virtual memory space. 
 
-\begin{comment}
-\vspace{3pt}
-\noindent
-\textbf{Data placement.} 
-%Each 128MB data slice may be further interleaved in various banks and channels within each tile.  
-Given the criticality of memory latency and bandwidth to graph processing, 
-we will provide several higher-level software APIs to allow the application developer or compilers (T2 thrust performers) to provide semantic information about matrix representations laid out in memory. 
-For instance, the programmer may explicitly tag the column pointer, row index and value vectors (for compressed column representation). 
-This information will be used by the memory system to determine how to layout these arrays (bank interleaving and distribution across memory channels) in memory and also to generate bank and channel access commands for each vector appropriately. 
-% intermediate matrices and vectors that may be generated  may also be tagged by the programmer to indicate how they are being stored (doubly compressed column or row etc.,).  %For instance, in centrality analysis using all pairs shortest paths approach the shortest paths for each pair are stored as intermediate results that will be used in the final reduction process to extract the central vertex.  Each matrix or vector's  physical address to appropriate bank and channel activation sequence.
-%Appropriate interleaving of data across a large number of channels is critical for enabling parallel access. 
-%If requests from multiple GAMA corelets can be routed to different channels then their requests can be satisfied in parallel. 
-Depending on the sparse matrix representation some data structures may see sequential accesses to large blocks while other structures may encounter mostly random accesses. For instance, in a compressed column  representation the column pointer vector is randomly accessed to select a given column (for instance, in a BFS the starting vertex column) and then the value in column pointer is used as index into row index  vector and value vector. The row index and value vectors are scanned together to reconstruct the column. Hence it is best to put the row index vector and value vector on different channels which can be concurrently accessed to accelerate the column reconstruction.  
-
-For dense matrices we expect the programmer to use the software API to provide hints to the hardware whether a matrix is predominantly accessed column-wise or row-wise in the next computation phase. 
-These hints can be updated at various computation phases in a kernel. The hardware uses this information to decide on an appropriate matrix layout in memory. 
-
-%MURALI:SHOULD WE INCLUDE THIS LEVEL OF DETAILS?
-\end{comment}
 
 \vspace{3pt}
 \noindent
@@ -218,6 +198,30 @@ when a bank is unused.
  
 %The L2 cache line size is 64 bytes. As we will discuss later the cache supports variable granularity  cache line size, which we call elastic cache. Hence, a single 64 line may contain up to four 16-byte chunks from different addresses.  
 
+\begin{comment}
+\vspace{3pt}
+\noindent
+\textbf{Data placement.} 
+%Each 128MB data slice may be further interleaved in various banks and channels within each tile.  
+Given the criticality of memory latency and bandwidth to graph processing, 
+we will provide several higher-level software APIs to allow the application developer or compilers (T2 thrust performers) to provide semantic information about matrix representations laid out in memory. 
+For instance, the programmer may explicitly tag the column pointer, row index and value vectors (for compressed column representation). 
+This information will be used by the memory system to determine how to layout these arrays (bank interleaving and distribution across memory channels) in memory and also to generate bank and channel access commands for each vector appropriately. 
+% intermediate matrices and vectors that may be generated  may also be tagged by the programmer to indicate how they are being stored (doubly compressed column or row etc.,).  %For instance, in centrality analysis using all pairs shortest paths approach the shortest paths for each pair are stored as intermediate results that will be used in the final reduction process to extract the central vertex.  Each matrix or vector's  physical address to appropriate bank and channel activation sequence.
+%Appropriate interleaving of data across a large number of channels is critical for enabling parallel access. 
+%If requests from multiple GAMA corelets can be routed to different channels then their requests can be satisfied in parallel. 
+Depending on the sparse matrix representation, some data structures may see sequential accesses to large blocks while other structures may encounter mostly random accesses. 
+For instance, in a compressed column representation the column pointer vector is randomly accessed 
+to select a given column (e.g., the starting vertex column in a BFS). 
+Then the value in a column pointer is used to index row index and value vectors. 
+
+The row index and value vectors are scanned together to reconstruct the column. 
+Hence it is best to put the row index and value vector on different channels which can be concurrently accessed to accelerate the column reconstruction.  
+
+For dense matrices we expect the programmer to use the software API to provide hints to the hardware whether a matrix is predominantly accessed column-wise or row-wise in the next computation phase. 
+These hints can be updated at various computation phases in a kernel. 
+The hardware uses this information to decide on an appropriate matrix layout in memory. 
+\end{comment}
 
 \begin{comment}
 To enable such voltage boosting, we need to meet two requirements. 
