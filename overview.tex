@@ -36,7 +36,7 @@ To guide the discussion of the proposed research, we first present an overview o
 The system will rely on processing-in-memory architecture, but appropriately adapted for sparse matrix operations for graph processing. 
 Fig.~\ref{fig:arch}(a) presents the overview of the GAMA (Graph Acceleration through Matrix Abstraction) system consisting of 16 GAMA tiles and host systems connected by power-efficient inter-chip OpenCAPI links.
 A GAMA tile consists of a many-core GAMA accelerator, four 8GB high-bandwidth memory dies (DiRAM4) with 64$\times$32-bit memory channels, 
-and four OpenCAPI links with aggregate memory bandwidth of 1TBps to four other GAMA tiles or a host system.
+and four OpenCAPI links with aggregate memory bandwidth of 1TB/s to four other GAMA tiles or a host system.
 Subsequently, we will describe the detail of the accelerator (cf. Sec.~\ref{sec:processing}),  memory sub-system (cf. Sec.~\ref{sec:memory}), and circuit support for efficient inter-chip communication and strong scaling over 16 GAMA tiles (cf. Sec.~\ref{sec:scale}).
 
 
