@@ -88,9 +88,9 @@ controlling the data-flow of the acceleration engine for merging operations when
 %For efficient execution of complex \textbf{g}() and \textbf{f}(), we propose to use 
 
 The architecture of a GAMA accelerator is composed of four MIMD clusters, and the cluster architecture is depicted in Figure~\ref{fig:arch}(b).
-The four cluster consists of a total of 16 cores operating at 2GHz or higher and connected to a special 512KB eDRAM-based L2 cache (cf. Sec.~\ref{sec:memory:on-chip}) and a 16GBps on-chip interconnect between them. 
-An eDRAM L2 cache can be connected to one of 16 DiRAM4 memory controllers, each of which is connected to a 64-bit (16GBps) DiRAM4 memory channel, through switches.
-Moreover, a core can send a memory request to a port of the OpenCAPI link consisting of 16 ports and providing 256GBps aggregate bandwidth, 
+The four cluster consists of a total of 16 cores operating at 2GHz or higher and connected to a special 512KB eDRAM-based L2 cache (cf. Sec.~\ref{sec:memory:on-chip}) and a 16GB/s on-chip interconnect between them. 
+An eDRAM L2 cache can be connected to one of 16 DiRAM4 memory controllers, each of which is connected to a 64-bit (16GB/s) DiRAM4 memory channel, through switches.
+Moreover, a core can send a memory request to a port of the OpenCAPI link consisting of 16 ports and providing 256GB/s aggregate bandwidth, 
 as well as network on-chip (NOC) interconnects to three other clusters.  
 %which are connected to each other through on-chip network.
 
