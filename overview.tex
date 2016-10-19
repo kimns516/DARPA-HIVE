@@ -12,7 +12,8 @@ Supporting such a broad range of operations on extremely large matrices is the f
 
 %An equally daunting challenge is the representation of large graphs as adjacency matrices in memory.
 Given the diversity of application domains where graph analytics may be used, the structure of graphs may also be varied. 
-To improve storage and bandwidth efficiency, sparse graphs may be stored in  a (double) compressed sparse row (CSR) or column (CSC) format. 
+%To improve storage and bandwidth efficiency, sparse graphs may be stored in  a (double) compressed sparse row (CSR) or column (CSC) format. 
+To improve storage and bandwidth efficiency, sparse graphs may be stored in  a (double) compressed sparse column or row format. 
 %But sparse graph representations also worsen irregular access patterns to memory.
 %M - I revise this because reading non-zero elements is sequential memory accesses. However, the last part of sparse matrix operations (merging processes) are very irregular. 
 %But sparse graph operations involve a large number of irregular memory accesses.
