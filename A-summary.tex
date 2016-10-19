@@ -14,13 +14,18 @@ for designing an efficient graph analytic processor.
 In this project, we aim to deliver 1000$\times$ higher system performance than the state-of-the-art GPU operating on sparse matrices.
 Toward the goal, we propose to build the GAMA (Graph Acceleration through Matrix Abstraction) system to tackle critical graph processing challenges. 
 The GAMA tile is a novel processing-in-memory architecture where a matrix computation accelerator is 2.5D-stacked with 4$\times$8GB DiRAM4 dies.
-The accelerator is composed of multiple GAMA cores, where each core is configured as an 8-lane SIMD engine customized for matrix operations. Each core 
-is provisioned with an L1 and a shared eDRAM L2 \emph{elastic caches} that support variable-width cache lines.  
-The elastic cache design exploits the unique properties of DiRAM4 which supports many more narrow width memory channels than traditional high bandwidth memory.
-This memory sub-system will efficiently support both sparse/random and dense/sequential memory accesses for efficient matrix operations. 
-Lastly, we  design a high-speed link with state-of-the-art charge-based and injection-locking circuit techniques, which allow us to provide the target 1TBps bandwidth for inter-chip communications under the tight chip power constraint.
+The accelerator is composed of multiple GAMA cores, where each core is configured as an 8-lane %SIMD 
+compute engine customized for matrix operations. 
+Each core is provisioned with \textit{elastic caches} 
+%L1 and shared eDRAM L2 caches 
+that support variable-width cache lines.  
+The elastic cache architecture exploits the unique properties of DiRAM4 which supports many more narrow-width memory channels than traditional high bandwidth memory.
+This memory sub-system will efficiently support both random/sparse and sequential/dense memory accesses for efficient matrix operations. 
+Lastly, we design a high-speed link with state-of-the-art charge-based and injection-locking circuit techniques, which allow us to provide the target 1TBps bandwidth for inter-chip communications under the tight chip power constraint.
 
-For improving scalability the GAMA memory system will store the semantic information related to the matrix representation, and expected access patterns of a given matrix. Several hardware hooks monitor  load imbalances across the GAMA tiles and provide an interface for software to decide on load migration strategies. We propose to monitor barrier synchronization stalls and allow the application developer to specify when it is acceptable for a GAMA tile to elide a barrier. 
+For improving scalability the GAMA memory system will store the semantic information related to the matrix representation, and expected access patterns of a given matrix. 
+Several hardware hooks monitor load imbalances across the GAMA tiles and provide an interface for software to decide on load migration strategies. 
+They also monitor barrier synchronization stalls, and allow the application developer to specify when it is acceptable for a GAMA tile to elide a barrier. 
 
 %Using these high-speed links we will interconnect 16 GAMA tiles in a GAMA system. 
 %an elastic cache architecture that 
@@ -29,12 +34,11 @@ For improving scalability the GAMA memory system will store the semantic informa
 
 
 To implement the GAMA system, % with innovative circuit and architecture techniques, 
-we work with 
-four companies on this project. 
+we work with four companies on this project. 
 Tezzaron will supply the DiRAM4 dies and support an integration path for graph processor including a memory controller soft IP that our team can enhance.
 eSilicon will provide the chip fabrication and 2.5D integration services.
 Nallatech will design a PCB that mounts 16 GAMA tiles and connects the tiles to the IBM OpenPower host system. % with our team, and fabricate it.
-IBM will support OpenCAPI interface specification and IPs for integrating the GAMA tiles with IBM OpenPower host processors. 
+IBM will support OpenCAPI interface IPs for integrating the GAMA tiles with IBM OpenPower host processors. 
 
 \vspace{3pt}
 \noindent
