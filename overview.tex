@@ -6,7 +6,7 @@ The evolving duality between graph algorithms and their equivalent matrix operat
 designing computing systems %that can efficiently manipulate matrix operations.  
 for efficient graph processing~\cite{graph:primitives}.
 For example, there are well known linear algebraic problem formulations for graph algorithms such as breadth first search, strongly connected components, shortest path, stress centrality, betweenness centrality, sub-graph detection and so on~\cite{kepner2011graph}.  
-These algorithms demand a diverse range of matrix operations, including matrix multiplication, Kronecker product,  matrix decomposition, inner and outer products, matrix inversion, matrix transpose and Eigen value computation.  
+These algorithms demand a diverse range of matrix operations, including matrix multiplication, Kronecker product,  matrix decomposition, inner and outer products, matrix inversion, matrix transpose, and Eigen value computation.  
 Supporting such a broad range of operations on extremely large matrices is the first challenge that will be tackled in this proposal. 
 
 
@@ -35,7 +35,7 @@ These observations lead to the main research thrusts of this proposal, as descri
 To guide the discussion of the proposed research, we first present an overview of the system architecture that we will design and build. 
 The system will rely on processing-in-memory architecture, but appropriately adapted for sparse matrix operations for graph processing. 
 Fig.~\ref{fig:arch}(a) presents the overview of the GAMA (Graph Acceleration through Matrix Abstraction) system consisting of 16 GAMA tiles and host systems connected by power-efficient inter-chip OpenCAPI links.
-A GAMA tile consists of a many-core GAMA accelerator, four 8GB high-bandwidth memory dies (DiRAM4) with 64$\times$32-bit memory channels, 
+A GAMA tile consists of a 16-core GAMA accelerator, four 8GB high-bandwidth memory dies (DiRAM4) with 64$\times$32-bit memory channels, 
 and four OpenCAPI links with aggregate memory bandwidth of 1TB/s to four other GAMA tiles or a host system.
 Subsequently, we will describe the detail of the accelerator (cf. Sec.~\ref{sec:processing}),  memory sub-system (cf. Sec.~\ref{sec:memory}), and circuit support for efficient inter-chip communication and strong scaling over 16 GAMA tiles (cf. Sec.~\ref{sec:scale}).
 
