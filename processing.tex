@@ -11,8 +11,8 @@ where \textbf{A} is a $N \times N$ connectivity matrix, \textbf{B} is a $1 \time
 \textit{g}($i$, $j$) returns $a_{i,j} \times b_{j}$ and \textit{f}($i$) returns $\sum_{j=1}^{N}$ \textit{g}($i$,$j$).
 
 
-As large graphs are often represented by very sparse matrices, compressed formats, such as double compressed sparse column and row (DCSR and DCSC) formats, are widely used to efficiently store the matrices in terms of storage size.
-However, the storage compaction complicates matrix operations and requires irregular memory accesses especially for constructing matrix \textbf{C} in a compressed format on the fly (i.e., merging operations).
+As large graphs are often represented by sparse matrices, compressed formats, such as double compressed sparse column and row (DCSR and DCSC) formats, are widely used for storage efficiency.
+However, the storage compaction complicates matrix operations and requires irregular memory accesses especially for constructing the matrix \textbf{C} in a compressed format on the fly (i.e., merging operations).
 After carefully analyzing the state-of-the-art DCSC and DCSR formats and matrix multiplication algorithms based on these formats, 
 we propose the GAMA core microarchitecture depicted in Fig.~\ref{fig:arch}(c). The GAMA core avoids storing \textbf{A} and \textbf{B} in multiple formats, which can simplify the accesses of  non-zero values (NZVs) for matrix operations.
 Our microarchitecture can handle both row- and colum-major formats, but for discussion clarity here let us assume  \textbf{A} and \textbf{B} are stored in DCSC or a similar column-major format.
@@ -59,7 +59,7 @@ allowing the GAMA accelerator to operate at higher frequency under the power con
 The 8 computed results with the corresponding 8 row indices from the first entry of A-column buffer will be applied to 
 the ``parallel memory access unit'' in Fig.~\ref{fig:arch}(c) with 
 (1) the column index of NZVs in a processor register and (2) the starting address of the heap associated with the column index of B-column buffer.
-The heap is used to construct $c_{i,k} in $\textbf{C} from $a_{i,j} \times b_{j,k}$ for a range of $j$ (i.e., merging operations)~\cite{buluc:ipdps:2015}. 
+The heap is used to construct $c_{i,k}$ in \textbf{C} from $a_{i,j} \times b_{j,k}$ for a range of $j$ (i.e., merging operations)~\cite{buluc:ipdps:2015}. 
 As the access pattern of the heap is very random, these 8 values with random addresses will be stored to and retrieved from our elastic L1D cache (cf. Sec.~\ref{sec:memory:on-chip}) with 8 banks to support 8 concurrent accesses to 8 different random addresses.
 Moreover, we will use the ALUs to support three-operand computations such as multiply-add, to efficiently support the accumulation of 
 the computed values to the corresponding values of \textbf{C} stored in the heap.
